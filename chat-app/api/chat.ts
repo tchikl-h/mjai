@@ -34,7 +34,7 @@ export default async function handler(req: any, res: any) {
       system: playerDescription,
       prompt: mjMessage,
       temperature: 0.8,
-      maxOutputTokens: 150
+      maxTokens: 150
     });
 
     console.log(`Response for ${playerName}:`, text);
