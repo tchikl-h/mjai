@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PlayerImpl } from './models/player.model';
@@ -18,9 +18,10 @@ interface Message {
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, AfterViewChecked {
   messages: Message[] = [];
   newMessage: string = '';
+  @ViewChild('chatMessages') private chatMessagesContainer!: ElementRef;
 
   constructor(protected gameService: GameService) {}
 
@@ -78,5 +79,19 @@ export class AppComponent implements OnInit {
 
   getCurrentTurnNumber(): number {
     return this.gameService.getCurrentTurn().turnNumber;
+  }
+
+  ngAfterViewChecked() {
+    this.scrollToBottom();
+  }
+
+  private scrollToBottom(): void {
+    try {
+      if (this.chatMessagesContainer) {
+        this.chatMessagesContainer.nativeElement.scrollTop = this.chatMessagesContainer.nativeElement.scrollHeight;
+      }
+    } catch (err) {
+      console.error('Error scrolling to bottom:', err);
+    }
   }
 }
