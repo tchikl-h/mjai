@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PlayerImpl } from './models/player.model';
 import { GameService } from './services/game.service';
+import { ApiService } from './services/api.service';
 
 interface Message {
   text: string;
@@ -23,7 +24,7 @@ export class AppComponent implements OnInit, AfterViewChecked {
   newMessage: string = '';
   @ViewChild('chatMessages') private chatMessagesContainer!: ElementRef;
 
-  constructor(protected gameService: GameService) {}
+  constructor(protected gameService: GameService, private apiService: ApiService) {}
 
   ngOnInit() {
     const players = [
@@ -35,30 +36,47 @@ export class AppComponent implements OnInit, AfterViewChecked {
     this.gameService.setPlayers(players);
   }
 
-  sendMessage() {
+  async sendMessage() {
     if (this.newMessage.trim()) {
+      const mjMessage = this.newMessage;
+      
       this.messages.push({
-          text: this.newMessage,
+          text: mjMessage,
           sender: 'mj',
           timestamp: new Date()
         });
       
       this.newMessage = '';
       
-      // Auto-respond with "hello" from the next player/MJ
-      setTimeout(() => {
-        const nextPlayer = this.gameService.getCurrentTurn().getCurrentPlayer();
+      // Generate AI response from the current player
+      try {
+        const currentPlayer = this.gameService.getCurrentTurn().getCurrentPlayer();
+        const playerResponse = await this.apiService.generatePlayerResponse(currentPlayer, mjMessage);
         
         this.messages.push({
-          text: 'hello',
+          text: playerResponse,
           sender: 'player',
           timestamp: new Date(),
-          player: nextPlayer as PlayerImpl
+          player: currentPlayer as PlayerImpl
         });
         
         // Move to next player
         this.gameService.nextPlayer();
-      }, 500);
+      } catch (error) {
+        console.error('Error generating player response:', error);
+        
+        // Fallback to simple response
+        const currentPlayer = this.gameService.getCurrentTurn().getCurrentPlayer();
+        this.messages.push({
+          text: 'I listen carefully to your words.',
+          sender: 'player',
+          timestamp: new Date(),
+          player: currentPlayer as PlayerImpl
+        });
+        
+        // Move to next player
+        this.gameService.nextPlayer();
+      }
     }
   }
 
