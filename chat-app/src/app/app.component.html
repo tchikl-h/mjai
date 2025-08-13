@@ -1,0 +1,27 @@
+<div class="chat-container">
+  <div class="chat-header">
+    <h1>MJ AI</h1>
+  </div>
+  
+  <div class="chat-messages">
+    <div 
+      *ngFor="let message of messages" 
+      class="message"
+      [ngClass]="{'user-message': message.sender === 'user', 'bot-message': message.sender === 'bot'}">
+      <div class="message-content">
+        <span class="message-text">{{ message.text }}</span>
+        <span class="message-time">{{ message.timestamp | date:'HH:mm' }}</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="chat-input">
+    <input 
+      type="text" 
+      [(ngModel)]="newMessage" 
+      (keydown)="onEnter($event)"
+      placeholder="Type your message..."
+      class="message-input">
+    <button (click)="sendMessage()" class="send-button">Send</button>
+  </div>
+</div>
