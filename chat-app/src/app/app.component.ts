@@ -6,7 +6,7 @@ import { GameService } from './services/game.service';
 
 interface Message {
   text: string;
-  sender: 'user' | 'bot' | 'player' | 'mj';
+  sender:'player' | 'mj';
   timestamp: Date;
   player?: PlayerImpl;
 }
@@ -55,7 +55,7 @@ export class AppComponent implements OnInit {
           player: nextPlayer as PlayerImpl
         });
         
-        // Move to next player for the next user input
+        // Move to next player
         this.gameService.nextPlayer();
       }, 500);
     }
@@ -66,5 +66,17 @@ export class AppComponent implements OnInit {
       event.preventDefault();
       this.sendMessage();
     }
+  }
+
+  getTurnOrder(): PlayerImpl[] {
+    return this.gameService.getCurrentTurn().turnOrder;
+  }
+
+  getCurrentPlayerIndex(): number {
+    return this.gameService.getCurrentTurn().currentPlayerIndex;
+  }
+
+  getCurrentTurnNumber(): number {
+    return this.gameService.getCurrentTurn().turnNumber;
   }
 }

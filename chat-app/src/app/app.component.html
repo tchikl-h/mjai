@@ -1,50 +1,75 @@
-<div class="chat-container">
-  <div class="chat-header">
-    <h1>MJ AI</h1>
-  </div>
-  
-  <div class="chat-messages">
-    <div 
-      *ngFor="let message of messages" 
-      class="message"
-      [ngClass]="{
-        'user-message': message.sender === 'user', 
-        'bot-message': message.sender === 'bot',
-        'player-message': message.sender === 'player',
-        'mj-message': message.sender === 'mj'
-      }">
-      
-      <!-- Player message with avatar, name, and health -->
-      <div *ngIf="message.sender === 'player' && message.player" class="player-info">
-        <img [src]="message.player.imageUri" [alt]="message.player.name" class="player-avatar">
-        <div class="player-details">
-          <span class="player-name">{{ message.player.name }}</span>
-          <span class="player-health">❤️ {{ message.player.health }}/3</span>
+<div class="app-container">
+  <div class="chat-container">
+    <div class="chat-header">
+      <h1>MJ AI</h1>
+    </div>
+    
+    <div class="chat-messages">
+      <div 
+        *ngFor="let message of messages" 
+        class="message"
+        [ngClass]="{
+          'player-message': message.sender === 'player',
+          'mj-message': message.sender === 'mj'
+        }">
+        
+        <!-- Player message with avatar, name, and health -->
+        <div *ngIf="message.sender === 'player' && message.player" class="player-info">
+          <img [src]="message.player.imageUri" [alt]="message.player.name" class="player-avatar">
+          <div class="player-details">
+            <span class="player-name">{{ message.player.name }}</span>
+            <span class="player-health">❤️ {{ message.player.health }}/3</span>
+          </div>
         </div>
-      </div>
-      
-      <!-- MJ message indicator -->
-      <div *ngIf="message.sender === 'mj'" class="mj-info">
-        <div class="mj-avatar">🎭</div>
-        <div class="mj-details">
-          <span class="mj-name">Game Master</span>
+        
+        <!-- MJ message indicator -->
+        <div *ngIf="message.sender === 'mj'" class="mj-info">
+          <div class="mj-avatar">🎭</div>
+          <div class="mj-details">
+            <span class="mj-name">Game Master</span>
+          </div>
         </div>
-      </div>
-      
-      <div class="message-content">
-        <span class="message-text">{{ message.text }}</span>
-        <span class="message-time">{{ message.timestamp | date:'HH:mm' }}</span>
+        
+        <div class="message-content">
+          <span class="message-text">{{ message.text }}</span>
+          <span class="message-time">{{ message.timestamp | date:'HH:mm' }}</span>
+        </div>
       </div>
     </div>
+    
+    <div class="chat-input">
+      <input 
+        type="text" 
+        [(ngModel)]="newMessage" 
+        (keydown)="onEnter($event)"
+        placeholder="Type your message..."
+        class="message-input">
+      <button (click)="sendMessage()" class="send-button">Send</button>
+    </div>
   </div>
-  
-  <div class="chat-input">
-    <input 
-      type="text" 
-      [(ngModel)]="newMessage" 
-      (keydown)="onEnter($event)"
-      placeholder="Type your message..."
-      class="message-input">
-    <button (click)="sendMessage()" class="send-button">Send</button>
+
+  <div class="turn-order-sidebar">
+    <div class="sidebar-header">
+      <h3>Turn Order</h3>
+      <span class="turn-number">Turn {{ getCurrentTurnNumber() }}</span>
+    </div>
+    
+    <div class="turn-list">
+      <div 
+        *ngFor="let player of getTurnOrder(); let i = index" 
+        class="turn-player"
+        [ngClass]="{'current-player': i === getCurrentPlayerIndex()}">
+        
+        <div class="turn-player-info">
+          <img [src]="player.imageUri" [alt]="player.name" class="turn-avatar">
+          <div class="turn-details">
+            <span class="turn-name">{{ player.name }}</span>
+            <span class="turn-health">❤️ {{ player.health }}/3</span>
+          </div>
+        </div>
+        
+        <div *ngIf="i === getCurrentPlayerIndex()" class="current-indicator">▶</div>
+      </div>
+    </div>
   </div>
 </div>
