@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PlayerImpl } from '../../models/player.model';
 import { TraitsService } from '../../services/traits.service';
+import { I18nService } from '../../services/i18n.service';
 
 @Component({
   selector: 'app-player-card',
@@ -17,7 +18,10 @@ export class PlayerCardComponent {
   @Input() size: 'small' | 'normal' = 'normal';
   @Output() healthToggle = new EventEmitter<{ player: PlayerImpl, heartIndex: number }>();
 
-  constructor(private traitsService: TraitsService) {}
+  constructor(
+    private traitsService: TraitsService,
+    protected i18n: I18nService
+  ) {}
 
   onHealthToggle(heartIndex: number): void {
     if (this.showControls) {
@@ -27,5 +31,11 @@ export class PlayerCardComponent {
 
   getTraitIcon(): string {
     return this.traitsService.getTraitIcon(this.player.trait.name);
+  }
+
+  getTraitTooltip(): string {
+    const name = this.traitsService.getLocalizedTraitName(this.player.trait);
+    const description = this.traitsService.getLocalizedTraitDescription(this.player.trait);
+    return `${name}: ${description}`;
   }
 }

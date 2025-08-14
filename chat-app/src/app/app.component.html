@@ -2,8 +2,8 @@
   <!-- Left Sidebar - Turn Order -->
   <div class="turn-order-sidebar left">
     <div class="sidebar-header">
-      <h3>Turn Order</h3>
-      <span class="turn-number">Turn {{ getCurrentTurnNumber() }}</span>
+      <h3>{{ i18n.translate('turn.order') }}</h3>
+      <span class="turn-number">{{ i18n.translate('turn.number') }} {{ getCurrentTurnNumber() }}</span>
     </div>
     
     <div class="turn-list">
@@ -20,7 +20,8 @@
   <!-- Center - Chat -->
   <div class="chat-container">
     <div class="chat-header">
-      <h1>MJ AI</h1>
+      <h1>{{ i18n.translate('app.title') }}</h1>
+      <app-language-switcher></app-language-switcher>
     </div>
     
     <div class="chat-messages" #chatMessages>
@@ -47,7 +48,7 @@
               </span>
               <span 
                 class="trait-icon small" 
-                [title]="message.player.trait.name + ': ' + message.player.trait.description">
+                [title]="getPlayerTraitTooltip(message.player)">
                 {{ getTraitIcon(message.player.trait.name) }}
               </span>
             </div>
@@ -58,7 +59,7 @@
         <div *ngIf="message.sender === 'mj'" class="mj-info">
           <div class="mj-avatar">🎭</div>
           <div class="mj-details">
-            <span class="mj-name">Game Master</span>
+            <span class="mj-name">{{ i18n.translate('game.master') }}</span>
           </div>
         </div>
         
@@ -74,16 +75,16 @@
         type="text" 
         [(ngModel)]="newMessage" 
         (keydown)="onEnter($event)"
-        placeholder="Type your message..."
+        [placeholder]="i18n.translate('message.placeholder')"
         class="message-input">
-      <button (click)="sendMessage()" class="send-button">Send</button>
+      <button (click)="sendMessage()" class="send-button">{{ i18n.translate('send.button') }}</button>
     </div>
   </div>
 
   <!-- Top Right - Dice Roller & Challenges -->
   <div class="dice-section top-right">
     <div class="sidebar-header">
-      <h3>Dice Roller</h3>
+      <h3>{{ i18n.translate('dice.roller') }}</h3>
     </div>
     <div class="dice-container">
       <app-dice></app-dice>

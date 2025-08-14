@@ -1,0 +1,12 @@
+<div class="language-switcher">
+  <div class="language-options">
+    <button
+      *ngFor="let lang of availableLanguages"
+      class="language-button"
+      [class.active]="isCurrentLanguage(lang.code)"
+      (click)="switchLanguage(lang.code)"
+      [title]="'Switch to ' + lang.name">
+      {{ lang.code.toUpperCase() }}
+    </button>
+  </div>
+</div>

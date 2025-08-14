@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { PlayerImpl } from '../../models/player.model';
 import { TraitsService } from '../../services/traits.service';
 import { ChallengeService } from '../../services/challenge.service';
+import { I18nService } from '../../services/i18n.service';
 
 @Component({
   selector: 'app-challenges-list',
@@ -16,11 +17,16 @@ export class ChallengesListComponent {
 
   constructor(
     private traitsService: TraitsService,
-    private challengeService: ChallengeService
+    private challengeService: ChallengeService,
+    protected i18n: I18nService
   ) {}
 
-  getTraitIcon(traitName: string): string {
-    return this.traitsService.getTraitIcon(traitName);
+  getTraitIcon(player: PlayerImpl): string {
+    return this.traitsService.getTraitIcon(player.trait.name);
+  }
+
+  getLocalizedChallenge(player: PlayerImpl): string {
+    return this.traitsService.getLocalizedTraitChallenge(player.trait);
   }
 
   toggleChallengeResolved(player: PlayerImpl): void {

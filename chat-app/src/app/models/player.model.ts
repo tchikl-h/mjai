@@ -1,9 +1,14 @@
 import { Item } from './item.model';
 
+export interface LocalizedText {
+  en: string;
+  fr: string;
+}
+
 export interface Trait {
-  name: string;
-  description: string;
-  challenge: string;
+  name: LocalizedText;
+  description: LocalizedText;
+  challenge: LocalizedText;
 }
 
 export interface Player {

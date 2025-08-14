@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PlayerImpl } from './models/player.model';
+import { PlayerImpl, LocalizedText } from './models/player.model';
 import { GameService } from './services/game.service';
 import { ApiService } from './services/api.service';
 import { TraitsService } from './services/traits.service';
@@ -9,6 +9,8 @@ import { ChallengeService } from './services/challenge.service';
 import { DiceComponent } from './dice/dice.component';
 import { PlayerCardComponent } from './components/player-card/player-card.component';
 import { ChallengesListComponent } from './components/challenges-list/challenges-list.component';
+import { LanguageSwitcherComponent } from './components/language-switcher/language-switcher.component';
+import { I18nService } from './services/i18n.service';
 
 interface Message {
   text: string;
@@ -20,7 +22,7 @@ interface Message {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule, DiceComponent, PlayerCardComponent, ChallengesListComponent],
+  imports: [CommonModule, FormsModule, DiceComponent, PlayerCardComponent, ChallengesListComponent, LanguageSwitcherComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
@@ -33,7 +35,8 @@ export class AppComponent implements OnInit, AfterViewChecked {
     protected gameService: GameService, 
     private apiService: ApiService,
     private traitsService: TraitsService,
-    private challengeService: ChallengeService
+    private challengeService: ChallengeService,
+    protected i18n: I18nService
   ) {}
 
   ngOnInit() {
@@ -135,8 +138,14 @@ export class AppComponent implements OnInit, AfterViewChecked {
     return turnOrder[currentIndex] === player;
   }
 
-  getTraitIcon(traitName: string): string {
+  getTraitIcon(traitName: string | LocalizedText): string {
     return this.traitsService.getTraitIcon(traitName);
+  }
+
+  getPlayerTraitTooltip(player: PlayerImpl): string {
+    const name = this.traitsService.getLocalizedTraitName(player.trait);
+    const description = this.traitsService.getLocalizedTraitDescription(player.trait);
+    return `${name}: ${description}`;
   }
 
   onHealthToggle(event: { player: PlayerImpl, heartIndex: number }): void {
@@ -165,10 +174,10 @@ export class AppComponent implements OnInit, AfterViewChecked {
     
     // Check if player died or was revived
     if (previousHealth > 0 && player.health === 0) {
-      console.log(`${player.name} has been eliminated!`);
+      console.log(`${player.name} ${this.i18n.translate('player.died')}`);
       this.gameService.generateNewTurn();
     } else if (previousHealth === 0 && player.health > 0) {
-      console.log(`${player.name} has been revived!`);
+      console.log(`${player.name} ${this.i18n.translate('player.revived')}`);
       this.gameService.generateNewTurn();
     }
   }

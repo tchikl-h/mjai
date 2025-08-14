@@ -1,6 +1,6 @@
 <div class="challenges-section">
   <div class="challenges-header">
-    <h4>Player Challenges</h4>
+    <h4>{{ i18n.translate('player.challenges') }}</h4>
   </div>
   <div class="challenges-list">
     <div 
@@ -14,10 +14,10 @@
       <div class="challenge-player">
         <img [src]="player.imageUri" [alt]="player.name" class="challenge-avatar">
         <span class="challenge-player-name">{{ player.name }}</span>
-        <span class="challenge-trait-icon">{{ getTraitIcon(player.trait.name) }}</span>
+        <span class="challenge-trait-icon">{{ getTraitIcon(player) }}</span>
       </div>
       
-      <div class="challenge-text">{{ player.trait.challenge }}</div>
+      <div class="challenge-text">{{ getLocalizedChallenge(player) }}</div>
       
       <div class="challenge-controls">
         <button 
@@ -25,7 +25,7 @@
           [class.resolved]="player.challengeResolved"
           (click)="toggleChallengeResolved(player)"
           [disabled]="!player.isAlive()"
-          [title]="!player.isAlive() ? 'Player is eliminated' : (player.challengeResolved ? 'Mark as unresolved' : 'Mark as resolved')">
+          [title]="!player.isAlive() ? i18n.translate('player.eliminated') : (player.challengeResolved ? i18n.translate('challenge.unresolved') : i18n.translate('challenge.resolve'))">
           {{ player.challengeResolved ? '✅' : '⭕' }}
         </button>
       </div>

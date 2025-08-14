@@ -24,13 +24,13 @@
           [class.disabled]="!player.isAlive() || !showControls"
           [class.small]="size === 'small'"
           (click)="onHealthToggle(i)"
-          [title]="!player.isAlive() ? 'Player is eliminated' : !showControls ? '' : (i < player.health ? 'Click to remove health' : 'Click to add health')">
+          [title]="!player.isAlive() ? i18n.translate('player.eliminated') : !showControls ? '' : (i < player.health ? i18n.translate('health.remove') : i18n.translate('health.add'))">
           {{ i < player.health ? '❤️' : '🤍' }}
         </span>
         <span 
           class="trait-icon" 
           [class.small]="size === 'small'"
-          [title]="player.trait.name + ': ' + player.trait.description">
+          [title]="getTraitTooltip()">
           {{ getTraitIcon() }}
         </span>
       </div>
@@ -38,5 +38,5 @@
   </div>
   
   <div *ngIf="isCurrentPlayer && size !== 'small'" class="current-indicator">▶</div>
-  <div *ngIf="!player.isAlive()" class="eliminated-status">ELIMINATED</div>
+  <div *ngIf="!player.isAlive()" class="eliminated-status">{{ i18n.translate('eliminated') }}</div>
 </div>
