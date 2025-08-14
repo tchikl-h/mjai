@@ -8,19 +8,39 @@
     
     <div class="turn-list">
       <div 
-        *ngFor="let player of getTurnOrder(); let i = index" 
+        *ngFor="let player of getOrderedPlayers(); let i = index" 
         class="turn-player"
-        [ngClass]="{'current-player': i === getCurrentPlayerIndex()}">
+        [ngClass]="{
+          'current-player': isCurrentPlayer(player),
+          'eliminated-player': !player.isAlive()
+        }">
         
         <div class="turn-player-info">
-          <img [src]="player.imageUri" [alt]="player.name" class="turn-avatar">
+          <div class="avatar-container">
+            <img [src]="player.imageUri" [alt]="player.name" class="turn-avatar">
+            <div *ngIf="!player.isAlive()" class="eliminated-overlay">
+              <span class="eliminated-text">💀</span>
+            </div>
+          </div>
           <div class="turn-details">
-            <span class="turn-name">{{ player.name }}</span>
-            <span class="turn-health">❤️ {{ player.health }}/3</span>
+            <span class="turn-name" [class.eliminated]="!player.isAlive()">{{ player.name }}</span>
+            <div class="turn-health">
+              <span 
+                *ngFor="let heart of [1,2,3]; let i = index" 
+                class="heart"
+                [class.filled]="i < player.health"
+                [class.empty]="i >= player.health"
+                [class.disabled]="!player.isAlive()"
+                (click)="toggleHealth(player, i)"
+                [title]="!player.isAlive() ? 'Player is eliminated' : (i < player.health ? 'Click to remove health' : 'Click to add health')">
+                {{ i < player.health ? '❤️' : '🤍' }}
+              </span>
+            </div>
           </div>
         </div>
         
-        <div *ngIf="i === getCurrentPlayerIndex()" class="current-indicator">▶</div>
+        <div *ngIf="isCurrentPlayer(player)" class="current-indicator">▶</div>
+        <div *ngIf="!player.isAlive()" class="eliminated-status">ELIMINATED</div>
       </div>
     </div>
   </div>
@@ -45,7 +65,15 @@
           <img [src]="message.player.imageUri" [alt]="message.player.name" class="player-avatar">
           <div class="player-details">
             <span class="player-name">{{ message.player.name }}</span>
-            <span class="player-health">❤️ {{ message.player.health }}/3</span>
+            <div class="player-health">
+              <span 
+                *ngFor="let heart of [1,2,3]; let i = index" 
+                class="heart small"
+                [class.filled]="i < message.player.health"
+                [class.empty]="i >= message.player.health">
+                {{ i < message.player.health ? '❤️' : '🤍' }}
+              </span>
+            </div>
           </div>
         </div>
         

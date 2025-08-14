@@ -118,9 +118,9 @@
 }
 
 .player-health {
-  font-size: 0.8rem;
-  color: #cccccc;
-  font-weight: 500;
+  display: flex;
+  gap: 2px;
+  align-items: center;
 }
 
 .message-text {
@@ -266,10 +266,21 @@
   box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
 }
 
+.turn-player.eliminated-player {
+  border-color: #666;
+  background-color: #2a2a2a;
+  opacity: 0.7;
+}
+
 .turn-player-info {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+.avatar-container {
+  position: relative;
+  display: inline-block;
 }
 
 .turn-avatar {
@@ -284,6 +295,24 @@
   border-color: #28a745;
 }
 
+.eliminated-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eliminated-text {
+  font-size: 20px;
+  animation: pulse 2s infinite;
+}
+
 .turn-details {
   display: flex;
   flex-direction: column;
@@ -296,10 +325,75 @@
   font-size: 0.9rem;
 }
 
+.turn-name.eliminated {
+  color: #999;
+  text-decoration: line-through;
+}
+
+.eliminated-status {
+  color: #ff6b6b;
+  font-size: 0.7rem;
+  font-weight: bold;
+  text-align: center;
+  background-color: rgba(255, 107, 107, 0.2);
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin-left: 8px;
+}
+
 .turn-health {
-  color: #cccccc;
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+/* Heart styles */
+.heart {
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  padding: 2px;
+  border-radius: 4px;
+}
+
+.heart:hover {
+  transform: scale(1.2);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.heart.filled {
+  opacity: 1;
+}
+
+.heart.empty {
+  opacity: 0.4;
+}
+
+.heart.empty:hover {
+  opacity: 0.8;
+}
+
+/* Smaller hearts for chat messages */
+.heart.small {
   font-size: 0.8rem;
-  font-weight: 500;
+  cursor: default;
+  padding: 1px;
+}
+
+.heart.small:hover {
+  transform: none;
+  background-color: transparent;
+}
+
+.heart.disabled {
+  cursor: default;
+  opacity: 0.3;
+}
+
+.heart.disabled:hover {
+  transform: none;
+  background-color: transparent;
 }
 
 .current-indicator {

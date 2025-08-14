@@ -20,6 +20,7 @@ export class GameService {
     const alivePlayers = this.players.filter(player => player.isAlive());
     
     if (alivePlayers.length === 0) {
+      console.log('No players alive! Game over.');
       this.currentTurn = new TurnImpl([], 0, this.currentTurn.turnNumber);
       return;
     }
@@ -32,7 +33,8 @@ export class GameService {
     for (let i = 0; i < shuffledPlayers.length; i++) {
       turnOrder.push(shuffledPlayers[i]);
     }
-    console.log(turnOrder);
+    
+    console.log(`New turn generated with ${alivePlayers.length} alive players:`, turnOrder.map(p => p.name));
     this.currentTurn = new TurnImpl(turnOrder, 0, this.currentTurn.turnNumber);
   }
 

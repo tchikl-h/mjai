@@ -100,8 +100,58 @@ export class AppComponent implements OnInit, AfterViewChecked {
     return this.gameService.getCurrentTurn().turnNumber;
   }
 
+  getOrderedPlayers(): PlayerImpl[] {
+    const currentTurnOrder = this.gameService.getCurrentTurn().turnOrder as PlayerImpl[];
+    const allPlayers = this.gameService.getAllPlayers() as PlayerImpl[];
+    const eliminatedPlayers = allPlayers.filter(player => !player.isAlive());
+    
+    // Return turn order first, then eliminated players
+    return [...currentTurnOrder, ...eliminatedPlayers];
+  }
+
+  isPlayerInCurrentTurn(player: PlayerImpl): boolean {
+    return this.gameService.getCurrentTurn().turnOrder.includes(player);
+  }
+
+  getPlayerTurnIndex(player: PlayerImpl): number {
+    const currentTurnOrder = this.gameService.getCurrentTurn().turnOrder;
+    return currentTurnOrder.indexOf(player);
+  }
+
+  isCurrentPlayer(player: PlayerImpl): boolean {
+    const turnOrder = this.gameService.getCurrentTurn().turnOrder;
+    const currentIndex = this.gameService.getCurrentTurn().currentPlayerIndex;
+    return turnOrder[currentIndex] === player;
+  }
+
   ngAfterViewChecked() {
     this.scrollToBottom();
+  }
+
+  toggleHealth(player: PlayerImpl, heartIndex: number): void {
+    const previousHealth = player.health;
+    
+    if (heartIndex < player.health) {
+      // Click on a filled heart - decrease health
+      player.health = heartIndex;
+    } else {
+      // Click on an empty heart - set health to that level + 1
+      player.health = heartIndex + 1;
+    }
+    
+    // Ensure health stays within bounds (0-3)
+    player.health = Math.max(0, Math.min(3, player.health));
+    
+    console.log(`${player.name} health changed to: ${player.health}`);
+    
+    // Check if player died or was revived
+    if (previousHealth > 0 && player.health === 0) {
+      console.log(`${player.name} has been eliminated!`);
+      this.gameService.generateNewTurn();
+    } else if (previousHealth === 0 && player.health > 0) {
+      console.log(`${player.name} has been revived!`);
+      this.gameService.generateNewTurn();
+    }
   }
 
   private scrollToBottom(): void {
