@@ -85,7 +85,9 @@
     <div class="sidebar-header">
       <h3>Dice Roller</h3>
     </div>
-    <app-dice></app-dice>
+    <div class="dice-container">
+      <app-dice></app-dice>
+    </div>
     
     <app-challenges-list [players]="gameService.getAllPlayers()"></app-challenges-list>
   </div>
