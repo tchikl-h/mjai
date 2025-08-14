@@ -9,10 +9,11 @@ import { ChallengeService } from './services/challenge.service';
 import { GameStateService } from './services/game-state.service';
 import { DiceComponent } from './dice/dice.component';
 import { PlayerCardComponent } from './components/player-card/player-card.component';
-import { ChallengesListComponent } from './components/challenges-list/challenges-list.component';
 import { LanguageSwitcherComponent } from './components/language-switcher/language-switcher.component';
-import { WinScreenComponent } from './components/win-screen/win-screen.component';
-import { GameOverScreenComponent } from './components/game-over-screen/game-over-screen.component';
+// DEACTIVATED IMPORTS
+// import { ChallengesListComponent } from './components/challenges-list/challenges-list.component';
+// import { WinScreenComponent } from './components/win-screen/win-screen.component';
+// import { GameOverScreenComponent } from './components/game-over-screen/game-over-screen.component';
 import { I18nService } from './services/i18n.service';
 import { ElevenTtsComponent } from './components/eleven-tts/eleven-tts.component';
 
@@ -26,7 +27,7 @@ interface Message {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule, DiceComponent, PlayerCardComponent, ChallengesListComponent, LanguageSwitcherComponent, WinScreenComponent, GameOverScreenComponent, ElevenTtsComponent],
+  imports: [CommonModule, FormsModule, DiceComponent, PlayerCardComponent, LanguageSwitcherComponent, ElevenTtsComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
@@ -56,18 +57,23 @@ export class AppComponent implements OnInit, AfterViewChecked {
   ) {}
 
   ngOnInit() {
-    const randomTraits = this.traitsService.getRandomTraits(4);
+    // Trait system - DEACTIVATED - Using dummy trait to satisfy constructor
+    const dummyTrait = {
+      name: { en: 'None', fr: 'Aucun' },
+      description: { en: 'No trait', fr: 'Aucun trait' },
+      challenge: { en: 'No challenge', fr: 'Aucun défi' }
+    };
 
     const players = [
-      new PlayerImpl("Warrior", "A broad-shouldered warrior clad in weather-worn plate, the steel dulled by countless battles. A deep scar runs from his temple to his jaw, a silent testament to survival. His voice is gravel, his stare unshaken, and his hand never strays far from the hilt of his greatsword. Korran speaks little, but when he does, his words cut as sharply as his blade.", "assets/images/warrior.png", randomTraits[0]),
-      new PlayerImpl("Mage", "Draped in flowing midnight-blue robes embroidered with silver constellations, Selvara's eyes shimmer like starlight on still water. A slender crystal-tipped staff rests in her hand, pulsing faintly with arcane energy. Her voice is calm but edged with power, each word carrying the weight of ancient knowledge and the promise of unbridled magic.", "assets/images/mage.png", randomTraits[1]),
-      new PlayerImpl("Rogue", "Lean and sharp-eyed, Ryn moves like a shadow slipping between torchlight. A dark hood hides most of his face, but the glint of a knowing smirk can be seen when danger's near. Twin daggers rest at his hips, their edges whispering promises of silent endings. He speaks little, but every word feels like a calculated move in an unseen game.", "assets/images/rogue.png", randomTraits[2]),
-      new PlayerImpl("Hunter", "Wrapped in a weathered cloak of mottled greens and browns, Kaelen blends into the wild as naturally as wind through leaves. A longbow rests easily in his hand, its grip worn smooth from years of use. His sharp eyes miss nothing, tracking prey—or threats—with the patience of a predator. Quiet and steady, Kaelen speaks in few words, each rooted in the rhythm of the hunt.", "assets/images/hunter.png", randomTraits[3]),
+      new PlayerImpl("Warrior", "A broad-shouldered warrior clad in weather-worn plate, the steel dulled by countless battles. A deep scar runs from his temple to his jaw, a silent testament to survival. His voice is gravel, his stare unshaken, and his hand never strays far from the hilt of his greatsword. Korran speaks little, but when he does, his words cut as sharply as his blade.", "assets/images/warrior.png", dummyTrait),
+      new PlayerImpl("Mage", "Draped in flowing midnight-blue robes embroidered with silver constellations, Selvara's eyes shimmer like starlight on still water. A slender crystal-tipped staff rests in her hand, pulsing faintly with arcane energy. Her voice is calm but edged with power, each word carrying the weight of ancient knowledge and the promise of unbridled magic.", "assets/images/mage.png", dummyTrait),
+      new PlayerImpl("Rogue", "Lean and sharp-eyed, Ryn moves like a shadow slipping between torchlight. A dark hood hides most of his face, but the glint of a knowing smirk can be seen when danger's near. Twin daggers rest at his hips, their edges whispering promises of silent endings. He speaks little, but every word feels like a calculated move in an unseen game.", "assets/images/rogue.png", dummyTrait),
+      new PlayerImpl("Hunter", "Wrapped in a weathered cloak of mottled greens and browns, Kaelen blends into the wild as naturally as wind through leaves. A longbow rests easily in his hand, its grip worn smooth from years of use. His sharp eyes miss nothing, tracking prey—or threats—with the patience of a predator. Quiet and steady, Kaelen speaks in few words, each rooted in the rhythm of the hunt.", "assets/images/hunter.png", dummyTrait),
     ];
     this.gameService.setPlayers(players);
     
-    // Initialize game state
-    this.checkGameState();
+    // Game state checking - DEACTIVATED (for win/lose screens)
+    // this.checkGameState();
   }
 
   async sendMessage() {
@@ -100,8 +106,8 @@ export class AppComponent implements OnInit, AfterViewChecked {
         // Move to next player
         this.gameService.nextPlayer();
 
-        // Check game state after each message
-        this.checkGameState();
+        // Game state checking - DEACTIVATED
+        // this.checkGameState();
       } catch (error) {
         console.error('Error generating player response:', error);
         
@@ -121,8 +127,8 @@ export class AppComponent implements OnInit, AfterViewChecked {
         // Move to next player
         this.gameService.nextPlayer();
 
-        // Check game state after fallback response
-        this.checkGameState();
+        // Game state checking - DEACTIVATED
+        // this.checkGameState();
       }
     }
   }
@@ -170,6 +176,8 @@ export class AppComponent implements OnInit, AfterViewChecked {
     return turnOrder[currentIndex] === player;
   }
 
+  // Trait methods - DEACTIVATED
+  /*
   getTraitIcon(traitName: string | LocalizedText): string {
     return this.traitsService.getTraitIcon(traitName);
   }
@@ -179,6 +187,7 @@ export class AppComponent implements OnInit, AfterViewChecked {
     const description = this.traitsService.getLocalizedTraitDescription(player.trait);
     return `${name}: ${description}`;
   }
+  */
 
   onHealthToggle(event: { player: PlayerImpl, heartIndex: number }): void {
     this.toggleHealth(event.player, event.heartIndex);
@@ -256,11 +265,11 @@ export class AppComponent implements OnInit, AfterViewChecked {
     // Generate new turn order
     this.gameService.generateNewTurn();
     
-    // Reassign random traits
-    const randomTraits = this.traitsService.getRandomTraits(4);
-    allPlayers.forEach((player, index) => {
-      player.trait = randomTraits[index];
-    });
+    // Trait reassignment - DEACTIVATED
+    // const randomTraits = this.traitsService.getRandomTraits(4);
+    // allPlayers.forEach((player, index) => {
+    //   player.trait = randomTraits[index];
+    // });
     
     console.log('Game restarted');
   }
@@ -289,11 +298,13 @@ export class AppComponent implements OnInit, AfterViewChecked {
     if (previousHealth > 0 && player.health === 0) {
       console.log(`${player.name} ${this.i18n.translate('player.died')}`);
       this.gameService.generateNewTurn();
-      this.checkGameState();
+      // Game state checking - DEACTIVATED
+      // this.checkGameState();
     } else if (previousHealth === 0 && player.health > 0) {
       console.log(`${player.name} ${this.i18n.translate('player.revived')}`);
       this.gameService.generateNewTurn();
-      this.checkGameState();
+      // Game state checking - DEACTIVATED
+      // this.checkGameState();
     }
   }
 

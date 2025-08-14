@@ -27,12 +27,15 @@
           [title]="!player.isAlive() ? i18n.translate('player.eliminated') : !showControls ? '' : (i < player.health ? i18n.translate('health.remove') : i18n.translate('health.add'))">
           {{ i < player.health ? '❤️' : '🤍' }}
         </span>
+        <!-- Trait icon - DEACTIVATED -->
+        <!--
         <span 
           class="trait-icon" 
           [class.small]="size === 'small'"
           [title]="getTraitTooltip()">
           {{ getTraitIcon() }}
         </span>
+        -->
       </div>
     </div>
   </div>

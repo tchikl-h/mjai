@@ -1,4 +1,5 @@
-<!-- Win Screen Overlay -->
+<!-- Win Screen Overlay - DEACTIVATED -->
+<!--
 <app-win-screen
   *ngIf="gameStateService.status() === 'won'"
   [players]="gameService.getAllPlayers()"
@@ -6,8 +7,10 @@
   [finalTurn]="getCurrentTurnNumber()"
   (restart)="onRestart()">
 </app-win-screen>
+-->
 
-<!-- Game Over Screen Overlay -->
+<!-- Game Over Screen Overlay - DEACTIVATED -->
+<!--
 <app-game-over-screen
   *ngIf="gameStateService.status() === 'lost_all_dead' || gameStateService.status() === 'lost_too_many_turns'"
   [players]="gameService.getAllPlayers()"
@@ -15,8 +18,9 @@
   [finalTurn]="getCurrentTurnNumber()"
   (restart)="onRestart()">
 </app-game-over-screen>
+-->
 
-<div class="app-container" [style.display]="gameStateService.isGameOver() ? 'none' : 'grid'">
+<div class="app-container">
   <!-- Left Sidebar - Turn Order -->
   <div class="turn-order-sidebar left">
     <div class="sidebar-header">
@@ -64,11 +68,14 @@
                 [class.empty]="i >= message.player.health">
                 {{ i < message.player.health ? '❤️' : '🤍' }}
               </span>
+              <!-- Trait icon - DEACTIVATED -->
+              <!--
               <span 
                 class="trait-icon small" 
                 [title]="getPlayerTraitTooltip(message.player)">
                 {{ getTraitIcon(message.player.trait.name) }}
               </span>
+              -->
             </div>
           </div>
         </div>
@@ -108,7 +115,8 @@
       <app-dice></app-dice>
     </div>
     
-    <app-challenges-list [players]="gameService.getAllPlayers()"></app-challenges-list>
+    <!-- Challenges List - DEACTIVATED -->
+    <!-- <app-challenges-list [players]="gameService.getAllPlayers()"></app-challenges-list> -->
   </div>
 
   <!-- Hidden TTS Component for Character Speech -->

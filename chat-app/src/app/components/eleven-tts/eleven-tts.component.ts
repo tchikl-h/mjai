@@ -210,7 +210,7 @@ export class ElevenTtsComponent {
     const res = await fetch(this.backendUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ voiceId, text, voice_settings: this.buildVoiceSettings() })
+      body: JSON.stringify({ voiceId, text: 'Vous avez tout à fait raison, faisons cela !', voice_settings: this.buildVoiceSettings() })
     });
     if (!res.ok) {
       const msg = await safeReadText(res);

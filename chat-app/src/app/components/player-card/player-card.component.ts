@@ -29,6 +29,8 @@ export class PlayerCardComponent {
     }
   }
 
+  // Trait methods - DEACTIVATED
+  /*
   getTraitIcon(): string {
     return this.traitsService.getTraitIcon(this.player.trait.name);
   }
@@ -38,4 +40,5 @@ export class PlayerCardComponent {
     const description = this.traitsService.getLocalizedTraitDescription(this.player.trait);
     return `${name}: ${description}`;
   }
+  */
 }
