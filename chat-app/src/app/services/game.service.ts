@@ -56,7 +56,7 @@ export class GameService {
     
     // Check if we're starting a new turn (currentPlayerIndex wrapped to 0)
     if (this.currentTurn.isNewTurnStarting()) {
-      console.log("New turn starting! Generating new turn order...");
+      console.log(`New turn ${this.currentTurn.turnNumber} starting! Generating new turn order...`);
       this.generateNewTurn();
       return this.currentTurn.getCurrentPlayer();
     }

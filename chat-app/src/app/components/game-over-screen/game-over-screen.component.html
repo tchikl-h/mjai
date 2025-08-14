@@ -75,9 +75,17 @@
       </button>
     </div>
 
-    <!-- Atmospheric Effects -->
+    <!-- Enhanced Atmospheric Effects -->
     <div class="gloom-particles">
-      <div class="gloom-particle" *ngFor="let i of [1,2,3,4,5,6]">💨</div>
+      <div class="gloom-particle" *ngFor="let i of [1,2,3,4,5,6]">🌪️</div>
+    </div>
+    
+    <!-- Additional visual effects -->
+    <div class="blood-drops" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden;">
+      <div class="blood-drop" style="position: absolute; top: 10%; left: 20%; color: rgba(139, 0, 0, 0.4); font-size: 0.8rem; animation: fadeInUp 3s ease-out 2s both;">🩸</div>
+      <div class="blood-drop" style="position: absolute; top: 30%; left: 70%; color: rgba(139, 0, 0, 0.4); font-size: 0.6rem; animation: fadeInUp 3s ease-out 2.5s both;">🩸</div>
+      <div class="blood-drop" style="position: absolute; top: 70%; left: 15%; color: rgba(139, 0, 0, 0.4); font-size: 0.7rem; animation: fadeInUp 3s ease-out 3s both;">🩸</div>
+      <div class="blood-drop" style="position: absolute; top: 85%; left: 80%; color: rgba(139, 0, 0, 0.4); font-size: 0.5rem; animation: fadeInUp 3s ease-out 3.5s both;">🩸</div>
     </div>
   </div>
 </div>
