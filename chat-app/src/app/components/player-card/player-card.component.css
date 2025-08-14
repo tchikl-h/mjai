@@ -1,0 +1,193 @@
+.player-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  border-radius: 12px;
+  background-color: #404040;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.player-card.small {
+  padding: 0.5rem;
+}
+
+.player-card.current-player {
+  border-color: #28a745;
+  background-color: #1a472a;
+  box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
+}
+
+.player-card.eliminated-player {
+  border-color: #666;
+  background-color: #2a2a2a;
+  opacity: 0.7;
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.player-card.small .player-info {
+  gap: 0.5rem;
+}
+
+.avatar-container {
+  position: relative;
+  display: inline-block;
+}
+
+.player-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #666;
+}
+
+.player-card.small .player-avatar {
+  width: 32px;
+  height: 32px;
+}
+
+.current-player .player-avatar {
+  border-color: #28a745;
+}
+
+.eliminated-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eliminated-text {
+  font-size: 20px;
+  animation: pulse 2s infinite;
+}
+
+.player-card.small .eliminated-text {
+  font-size: 16px;
+}
+
+.player-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.player-name {
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.player-card.small .player-name {
+  font-size: 0.8rem;
+}
+
+.player-name.eliminated {
+  color: #999;
+  text-decoration: line-through;
+}
+
+.player-health {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.heart {
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  padding: 2px;
+  border-radius: 4px;
+}
+
+.heart:hover {
+  transform: scale(1.2);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.heart.filled {
+  opacity: 1;
+}
+
+.heart.empty {
+  opacity: 0.4;
+}
+
+.heart.empty:hover {
+  opacity: 0.8;
+}
+
+.heart.small {
+  font-size: 0.8rem;
+  cursor: default;
+  padding: 1px;
+}
+
+.heart.small:hover {
+  transform: none;
+  background-color: transparent;
+}
+
+.heart.disabled {
+  cursor: default;
+  opacity: 0.3;
+}
+
+.heart.disabled:hover {
+  transform: none;
+  background-color: transparent;
+}
+
+.trait-icon {
+  font-size: 1rem;
+  margin-left: 4px;
+  cursor: help;
+  transition: transform 0.2s ease;
+}
+
+.trait-icon:hover {
+  transform: scale(1.2);
+}
+
+.trait-icon.small {
+  font-size: 0.8rem;
+  margin-left: 3px;
+}
+
+.current-indicator {
+  color: #28a745;
+  font-size: 1.2rem;
+  font-weight: bold;
+  animation: pulse 1.5s infinite;
+}
+
+.eliminated-status {
+  color: #ff6b6b;
+  font-size: 0.7rem;
+  font-weight: bold;
+  text-align: center;
+  background-color: rgba(255, 107, 107, 0.2);
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin-left: 8px;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}

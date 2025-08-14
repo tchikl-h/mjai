@@ -4,7 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { PlayerImpl } from './models/player.model';
 import { GameService } from './services/game.service';
 import { ApiService } from './services/api.service';
+import { TraitsService } from './services/traits.service';
+import { ChallengeService } from './services/challenge.service';
 import { DiceComponent } from './dice/dice.component';
+import { PlayerCardComponent } from './components/player-card/player-card.component';
+import { ChallengesListComponent } from './components/challenges-list/challenges-list.component';
 
 interface Message {
   text: string;
@@ -16,7 +20,7 @@ interface Message {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule, DiceComponent],
+  imports: [CommonModule, FormsModule, DiceComponent, PlayerCardComponent, ChallengesListComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
@@ -25,90 +29,21 @@ export class AppComponent implements OnInit, AfterViewChecked {
   newMessage: string = '';
   @ViewChild('chatMessages') private chatMessagesContainer!: ElementRef;
 
-  constructor(protected gameService: GameService, private apiService: ApiService) {}
+  constructor(
+    protected gameService: GameService, 
+    private apiService: ApiService,
+    private traitsService: TraitsService,
+    private challengeService: ChallengeService
+  ) {}
 
   ngOnInit() {
-    const availableTraits = [
-      { 
-        "name": "Lazy", 
-        "description": "Avoids physical exertion and prefers rest over action.", 
-        "challenge": "Carry heavy supplies for the party during a full day’s travel."
-      },
-      { 
-        "name": "Slob", 
-        "description": "Careless with cleanliness and appearance.", 
-        "challenge": "Attend a royal banquet without offending anyone with your manners."
-      },
-      { 
-        "name": "Clumsy", 
-        "description": "Often trips, drops things, or fumbles in tense moments.", 
-        "challenge": "Disarm a delicate trap without triggering it."
-      },
-      { 
-        "name": "Mean-Spirited", 
-        "description": "Quick to insult or provoke others.", 
-        "challenge": "Negotiate peace between two feuding villagers."
-      },
-      { 
-        "name": "Evil", 
-        "description": "Takes pleasure in the suffering of others.", 
-        "challenge": "Protect a helpless NPC without harming them."
-      },
-      { 
-        "name": "Gloomy", 
-        "description": "Often pessimistic and melancholic.", 
-        "challenge": "Inspire the party with an uplifting speech before a battle."
-      },
-      { 
-        "name": "Noncommittal", 
-        "description": "Dislikes long-term plans or obligations.", 
-        "challenge": "Stick with the group through an entire dungeon without trying to leave."
-      },
-      { 
-        "name": "Hot-Headed", 
-        "description": "Easily angered and quick to act without thinking.", 
-        "challenge": "End a tense tavern argument without drawing your weapon."
-      },
-      { 
-        "name": "Insane / Erratic", 
-        "description": "Unpredictable behavior and strange habits.", 
-        "challenge": "Follow an entire plan exactly as discussed without improvising."
-      },
-      { 
-        "name": "Loner", 
-        "description": "Prefers solitude and avoids large groups.", 
-        "challenge": "Lead a crowded caravan safely to its destination."
-      },
-      { 
-        "name": "Hates Children", 
-        "description": "Feels uncomfortable around young ones.", 
-        "challenge": "Escort a lost child back to their family without abandoning them."
-      },
-      { 
-        "name": "Jealous", 
-        "description": "Suspicious and possessive in relationships.", 
-        "challenge": "Let another party member take the spotlight in a heroic deed."
-      },
-      { 
-        "name": "Glutton", 
-        "description": "Eats excessively and often at inopportune times.", 
-        "challenge": "Share your last ration with a starving stranger."
-      },
-      { 
-        "name": "Snob", 
-        "description": "Looks down on those of lower status or skill.", 
-        "challenge": "Work as an equal alongside a humble peasant to complete a task."
-      }
-    ];
-
-    // Randomly assign traits to players
-    const shuffledTraits = [...availableTraits].sort(() => Math.random() - 0.5);
+    const randomTraits = this.traitsService.getRandomTraits(4);
 
     const players = [
-      new PlayerImpl("Warrior", "A broad-shouldered warrior clad in weather-worn plate, the steel dulled by countless battles. A deep scar runs from his temple to his jaw, a silent testament to survival. His voice is gravel, his stare unshaken, and his hand never strays far from the hilt of his greatsword. Korran speaks little, but when he does, his words cut as sharply as his blade.", "assets/images/warrior.png", shuffledTraits[0]),
-      new PlayerImpl("Mage", "Draped in flowing midnight-blue robes embroidered with silver constellations, Selvara's eyes shimmer like starlight on still water. A slender crystal-tipped staff rests in her hand, pulsing faintly with arcane energy. Her voice is calm but edged with power, each word carrying the weight of ancient knowledge and the promise of unbridled magic.", "assets/images/mage.png", shuffledTraits[1]),
-      new PlayerImpl("Rogue", "Lean and sharp-eyed, Ryn moves like a shadow slipping between torchlight. A dark hood hides most of his face, but the glint of a knowing smirk can be seen when danger's near. Twin daggers rest at his hips, their edges whispering promises of silent endings. He speaks little, but every word feels like a calculated move in an unseen game.", "assets/images/rogue.png", shuffledTraits[2]),
-      new PlayerImpl("Hunter", "Wrapped in a weathered cloak of mottled greens and browns, Kaelen blends into the wild as naturally as wind through leaves. A longbow rests easily in his hand, its grip worn smooth from years of use. His sharp eyes miss nothing, tracking prey—or threats—with the patience of a predator. Quiet and steady, Kaelen speaks in few words, each rooted in the rhythm of the hunt.", "assets/images/hunter.png", shuffledTraits[3]),
+      new PlayerImpl("Warrior", "A broad-shouldered warrior clad in weather-worn plate, the steel dulled by countless battles. A deep scar runs from his temple to his jaw, a silent testament to survival. His voice is gravel, his stare unshaken, and his hand never strays far from the hilt of his greatsword. Korran speaks little, but when he does, his words cut as sharply as his blade.", "assets/images/warrior.png", randomTraits[0]),
+      new PlayerImpl("Mage", "Draped in flowing midnight-blue robes embroidered with silver constellations, Selvara's eyes shimmer like starlight on still water. A slender crystal-tipped staff rests in her hand, pulsing faintly with arcane energy. Her voice is calm but edged with power, each word carrying the weight of ancient knowledge and the promise of unbridled magic.", "assets/images/mage.png", randomTraits[1]),
+      new PlayerImpl("Rogue", "Lean and sharp-eyed, Ryn moves like a shadow slipping between torchlight. A dark hood hides most of his face, but the glint of a knowing smirk can be seen when danger's near. Twin daggers rest at his hips, their edges whispering promises of silent endings. He speaks little, but every word feels like a calculated move in an unseen game.", "assets/images/rogue.png", randomTraits[2]),
+      new PlayerImpl("Hunter", "Wrapped in a weathered cloak of mottled greens and browns, Kaelen blends into the wild as naturally as wind through leaves. A longbow rests easily in his hand, its grip worn smooth from years of use. His sharp eyes miss nothing, tracking prey—or threats—with the patience of a predator. Quiet and steady, Kaelen speaks in few words, each rooted in the rhythm of the hunt.", "assets/images/hunter.png", randomTraits[3]),
     ];
     this.gameService.setPlayers(players);
   }
@@ -201,28 +136,11 @@ export class AppComponent implements OnInit, AfterViewChecked {
   }
 
   getTraitIcon(traitName: string): string {
-    const traitIcons: { [key: string]: string } = {
-      'Lazy': '😴',
-      'Slob': '🗑️',
-      'Clumsy': '🤕',
-      'Mean-Spirited': '😠',
-      'Evil': '😈',
-      'Gloomy': '😔',
-      'Noncommittal': '🤷',
-      'Hot-Headed': '🔥',
-      'Insane / Erratic': '🤪',
-      'Loner': '🚶',
-      'Hates Children': '👶',
-      'Jealous': '💚',
-      'Glutton': '🍖',
-      'Snob': '👑'
-    };
-    return traitIcons[traitName] || '❓';
+    return this.traitsService.getTraitIcon(traitName);
   }
 
-  toggleChallengeResolved(player: PlayerImpl): void {
-    player.challengeResolved = !player.challengeResolved;
-    console.log(`${player.name}'s challenge "${player.trait.challenge}" marked as ${player.challengeResolved ? 'resolved' : 'unresolved'}`);
+  onHealthToggle(event: { player: PlayerImpl, heartIndex: number }): void {
+    this.toggleHealth(event.player, event.heartIndex);
   }
 
   ngAfterViewChecked() {

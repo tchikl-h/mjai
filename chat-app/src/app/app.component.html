@@ -7,46 +7,13 @@
     </div>
     
     <div class="turn-list">
-      <div 
-        *ngFor="let player of getOrderedPlayers(); let i = index" 
-        class="turn-player"
-        [ngClass]="{
-          'current-player': isCurrentPlayer(player),
-          'eliminated-player': !player.isAlive()
-        }">
-        
-        <div class="turn-player-info">
-          <div class="avatar-container">
-            <img [src]="player.imageUri" [alt]="player.name" class="turn-avatar">
-            <div *ngIf="!player.isAlive()" class="eliminated-overlay">
-              <span class="eliminated-text">💀</span>
-            </div>
-          </div>
-          <div class="turn-details">
-            <span class="turn-name" [class.eliminated]="!player.isAlive()">{{ player.name }}</span>
-            <div class="turn-health">
-              <span 
-                *ngFor="let heart of [1,2,3]; let i = index" 
-                class="heart"
-                [class.filled]="i < player.health"
-                [class.empty]="i >= player.health"
-                [class.disabled]="!player.isAlive()"
-                (click)="toggleHealth(player, i)"
-                [title]="!player.isAlive() ? 'Player is eliminated' : (i < player.health ? 'Click to remove health' : 'Click to add health')">
-                {{ i < player.health ? '❤️' : '🤍' }}
-              </span>
-              <span 
-                class="trait-icon" 
-                [title]="player.trait.name + ': ' + player.trait.description">
-                {{ getTraitIcon(player.trait.name) }}
-              </span>
-            </div>
-          </div>
-        </div>
-        
-        <div *ngIf="isCurrentPlayer(player)" class="current-indicator">▶</div>
-        <div *ngIf="!player.isAlive()" class="eliminated-status">ELIMINATED</div>
-      </div>
+      <app-player-card
+        *ngFor="let player of getOrderedPlayers()"
+        [player]="player"
+        [isCurrentPlayer]="isCurrentPlayer(player)"
+        [showControls]="true"
+        (healthToggle)="onHealthToggle($event)">
+      </app-player-card>
     </div>
   </div>
 
@@ -120,40 +87,6 @@
     </div>
     <app-dice></app-dice>
     
-    <!-- Challenges Section -->
-    <div class="challenges-section">
-      <div class="challenges-header">
-        <h4>Player Challenges</h4>
-      </div>
-      <div class="challenges-list">
-        <div 
-          *ngFor="let player of gameService.getAllPlayers()" 
-          class="challenge-item"
-          [ngClass]="{
-            'resolved': player.challengeResolved,
-            'eliminated': !player.isAlive()
-          }">
-          
-          <div class="challenge-player">
-            <img [src]="player.imageUri" [alt]="player.name" class="challenge-avatar">
-            <span class="challenge-player-name">{{ player.name }}</span>
-            <span class="challenge-trait-icon">{{ getTraitIcon(player.trait.name) }}</span>
-          </div>
-          
-          <div class="challenge-text">{{ player.trait.challenge }}</div>
-          
-          <div class="challenge-controls">
-            <button 
-              class="challenge-toggle"
-              [class.resolved]="player.challengeResolved"
-              (click)="toggleChallengeResolved(player)"
-              [disabled]="!player.isAlive()"
-              [title]="!player.isAlive() ? 'Player is eliminated' : (player.challengeResolved ? 'Mark as unresolved' : 'Mark as resolved')">
-              {{ player.challengeResolved ? '✅' : '⭕' }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <app-challenges-list [players]="gameService.getAllPlayers()"></app-challenges-list>
   </div>
 </div>

@@ -1,0 +1,42 @@
+<div class="player-card" 
+     [ngClass]="{
+       'current-player': isCurrentPlayer,
+       'eliminated-player': !player.isAlive(),
+       'small': size === 'small'
+     }">
+  
+  <div class="player-info">
+    <div class="avatar-container">
+      <img [src]="player.imageUri" [alt]="player.name" class="player-avatar">
+      <div *ngIf="!player.isAlive()" class="eliminated-overlay">
+        <span class="eliminated-text">💀</span>
+      </div>
+    </div>
+    
+    <div class="player-details">
+      <span class="player-name" [class.eliminated]="!player.isAlive()">{{ player.name }}</span>
+      <div class="player-health">
+        <span 
+          *ngFor="let heart of [1,2,3]; let i = index" 
+          class="heart"
+          [class.filled]="i < player.health"
+          [class.empty]="i >= player.health"
+          [class.disabled]="!player.isAlive() || !showControls"
+          [class.small]="size === 'small'"
+          (click)="onHealthToggle(i)"
+          [title]="!player.isAlive() ? 'Player is eliminated' : !showControls ? '' : (i < player.health ? 'Click to remove health' : 'Click to add health')">
+          {{ i < player.health ? '❤️' : '🤍' }}
+        </span>
+        <span 
+          class="trait-icon" 
+          [class.small]="size === 'small'"
+          [title]="player.trait.name + ': ' + player.trait.description">
+          {{ getTraitIcon() }}
+        </span>
+      </div>
+    </div>
+  </div>
+  
+  <div *ngIf="isCurrentPlayer && size !== 'small'" class="current-indicator">▶</div>
+  <div *ngIf="!player.isAlive()" class="eliminated-status">ELIMINATED</div>
+</div>
