@@ -39,6 +39,17 @@ interface TranslationKeys {
   'fallback.thinks': string;
   'fallback.cautious': string;
   'fallback.alert': string;
+
+  // Game End Messages
+  'game.won.all.challenges': string;
+  'game.won.challenges.details': string;
+  'game.over.all.dead': string;
+  'game.over.all.dead.details': string;
+  'game.over.too.many.turns': string;
+  'game.over.turn.limit.details': string;
+  'game.restart': string;
+  'game.congratulations': string;
+  'game.final.stats': string;
 }
 
 @Injectable({
@@ -87,7 +98,18 @@ export class I18nService {
       'fallback.considers': 'considers the situation carefully',
       'fallback.thinks': 'takes a moment to think',
       'fallback.cautious': 'looks around cautiously',
-      'fallback.alert': 'remains alert and ready'
+      'fallback.alert': 'remains alert and ready',
+
+      // Game End Messages
+      'game.won.all.challenges': 'Victory! All Challenges Completed!',
+      'game.won.challenges.details': '{{playerCount}} players completed all challenges in {{turnNumber}} turns!',
+      'game.over.all.dead': 'Game Over - All Players Eliminated',
+      'game.over.all.dead.details': 'All party members have fallen in battle.',
+      'game.over.too.many.turns': 'Game Over - Time Limit Exceeded',
+      'game.over.turn.limit.details': 'The adventure exceeded the {{maxTurns}} turn limit.',
+      'game.restart': 'Start New Game',
+      'game.congratulations': 'Congratulations!',
+      'game.final.stats': 'Final Statistics'
     },
     fr: {
       // UI Components
@@ -125,7 +147,18 @@ export class I18nService {
       'fallback.considers': 'considère la situation attentivement',
       'fallback.thinks': 'prend un moment pour réfléchir',
       'fallback.cautious': 'regarde autour prudemment',
-      'fallback.alert': 'reste vigilant et prêt'
+      'fallback.alert': 'reste vigilant et prêt',
+
+      // Game End Messages
+      'game.won.all.challenges': 'Victoire ! Tous les Défis Accomplis !',
+      'game.won.challenges.details': '{{playerCount}} joueurs ont accompli tous les défis en {{turnNumber}} tours !',
+      'game.over.all.dead': 'Fin de Partie - Tous les Joueurs Éliminés',
+      'game.over.all.dead.details': 'Tous les membres du groupe sont tombés au combat.',
+      'game.over.too.many.turns': 'Fin de Partie - Limite de Temps Dépassée',
+      'game.over.turn.limit.details': 'L\'aventure a dépassé la limite de {{maxTurns}} tours.',
+      'game.restart': 'Nouvelle Partie',
+      'game.congratulations': 'Félicitations !',
+      'game.final.stats': 'Statistiques Finales'
     }
   };
 

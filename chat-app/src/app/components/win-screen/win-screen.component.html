@@ -1,0 +1,64 @@
+<div class="win-screen-overlay">
+  <div class="win-screen-content">
+    <!-- Victory Header -->
+    <div class="victory-header">
+      <div class="victory-icon">🏆</div>
+      <h1 class="victory-title">{{ i18n.translate('game.congratulations') }}</h1>
+      <h2 class="victory-subtitle">{{ endReason.message }}</h2>
+    </div>
+
+    <!-- Game Stats -->
+    <div class="game-stats">
+      <h3>{{ i18n.translate('game.final.stats') }}</h3>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <span class="stat-value">{{ finalTurn }}</span>
+          <span class="stat-label">{{ finalTurn === 1 ? i18n.translate('turn.number') : i18n.translate('turn.number') + 's' }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ getAlivePlayers().length }}</span>
+          <span class="stat-label">{{ i18n.language() === 'fr' ? 'Survivants' : 'Survivors' }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ getCompletedChallenges().length }}</span>
+          <span class="stat-label">{{ i18n.language() === 'fr' ? 'Défis Réussis' : 'Challenges Completed' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Player Victory List -->
+    <div class="victory-players">
+      <h3>{{ i18n.language() === 'fr' ? 'Héros Victorieux' : 'Victorious Heroes' }}</h3>
+      <div class="player-list">
+        <div 
+          *ngFor="let player of getCompletedChallenges()" 
+          class="victory-player">
+          <img [src]="player.imageUri" [alt]="player.name" class="victory-avatar">
+          <div class="victory-player-info">
+            <span class="victory-player-name">{{ player.name }}</span>
+            <div class="victory-health">
+              <span *ngFor="let heart of [1,2,3]; let i = index" 
+                    class="victory-heart"
+                    [class.filled]="i < player.health">
+                {{ i < player.health ? '❤️' : '🤍' }}
+              </span>
+            </div>
+          </div>
+          <div class="victory-check">✅</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="win-actions">
+      <button class="restart-button" (click)="onRestart()">
+        {{ i18n.translate('game.restart') }}
+      </button>
+    </div>
+
+    <!-- Celebration Effects -->
+    <div class="celebration-particles">
+      <div class="particle" *ngFor="let i of [1,2,3,4,5,6,7,8,9,10]">🎉</div>
+    </div>
+  </div>
+</div>
