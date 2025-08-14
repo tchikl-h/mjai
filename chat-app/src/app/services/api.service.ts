@@ -16,7 +16,7 @@ export class ApiService {
     try {
       const requestBody = {
         playerName: player.name,
-        playerDescription: this.PREPROMPT + "You are" + player.description,
+        playerDescription: this.PREPROMPT + "You're main trait is " + player.trait.name + ", the following describes your whole personality : " + player.trait.description + ".You are" + player.description,
         mjMessage: `${mjMessage}. What do you do ?`
       };
 

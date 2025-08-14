@@ -35,6 +35,11 @@
                 [title]="!player.isAlive() ? 'Player is eliminated' : (i < player.health ? 'Click to remove health' : 'Click to add health')">
                 {{ i < player.health ? '❤️' : '🤍' }}
               </span>
+              <span 
+                class="trait-icon" 
+                [title]="player.trait.name + ': ' + player.trait.description">
+                {{ getTraitIcon(player.trait.name) }}
+              </span>
             </div>
           </div>
         </div>
@@ -73,6 +78,11 @@
                 [class.empty]="i >= message.player.health">
                 {{ i < message.player.health ? '❤️' : '🤍' }}
               </span>
+              <span 
+                class="trait-icon small" 
+                [title]="message.player.trait.name + ': ' + message.player.trait.description">
+                {{ getTraitIcon(message.player.trait.name) }}
+              </span>
             </div>
           </div>
         </div>
@@ -103,11 +113,47 @@
     </div>
   </div>
 
-  <!-- Top Right - Dice Roller -->
+  <!-- Top Right - Dice Roller & Challenges -->
   <div class="dice-section top-right">
     <div class="sidebar-header">
       <h3>Dice Roller</h3>
     </div>
     <app-dice></app-dice>
+    
+    <!-- Challenges Section -->
+    <div class="challenges-section">
+      <div class="challenges-header">
+        <h4>Player Challenges</h4>
+      </div>
+      <div class="challenges-list">
+        <div 
+          *ngFor="let player of gameService.getAllPlayers()" 
+          class="challenge-item"
+          [ngClass]="{
+            'resolved': player.challengeResolved,
+            'eliminated': !player.isAlive()
+          }">
+          
+          <div class="challenge-player">
+            <img [src]="player.imageUri" [alt]="player.name" class="challenge-avatar">
+            <span class="challenge-player-name">{{ player.name }}</span>
+            <span class="challenge-trait-icon">{{ getTraitIcon(player.trait.name) }}</span>
+          </div>
+          
+          <div class="challenge-text">{{ player.trait.challenge }}</div>
+          
+          <div class="challenge-controls">
+            <button 
+              class="challenge-toggle"
+              [class.resolved]="player.challengeResolved"
+              (click)="toggleChallengeResolved(player)"
+              [disabled]="!player.isAlive()"
+              [title]="!player.isAlive() ? 'Player is eliminated' : (player.challengeResolved ? 'Mark as unresolved' : 'Mark as resolved')">
+              {{ player.challengeResolved ? '✅' : '⭕' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
