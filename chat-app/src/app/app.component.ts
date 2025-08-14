@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { PlayerImpl } from './models/player.model';
 import { GameService } from './services/game.service';
 import { ApiService } from './services/api.service';
+import { DiceComponent } from './dice/dice.component';
 
 interface Message {
   text: string;
@@ -15,7 +16,7 @@ interface Message {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DiceComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
