@@ -12,12 +12,15 @@ export class PromptBuilderService {
 
   buildPlayerPrompt(player: PlayerImpl): string {
     const lang = this.i18n.language();
-    const traitSection = this.buildTraitSection(player);
+    // Trait section - DEACTIVATED
+    // const traitSection = this.buildTraitSection(player);
     const descriptionSection = this.buildDescriptionSection(player);
     
-    return `${PROMPT_CONFIG.BASE_PREPROMPT[lang]} ${traitSection} ${descriptionSection}`.trim();
+    return `${PROMPT_CONFIG.BASE_PREPROMPT[lang]} ${descriptionSection}`.trim();
   }
 
+  // DEACTIVATED - Trait system
+  /*
   private buildTraitSection(player: PlayerImpl): string {
     const lang = this.i18n.language();
     const traitName = player.trait.name[lang];
@@ -28,6 +31,7 @@ export class PromptBuilderService {
     }
     return `Your main trait is ${traitName}, which means: ${traitDescription}.`;
   }
+  */
 
   private buildDescriptionSection(player: PlayerImpl): string {
     const lang = this.i18n.language();
@@ -79,6 +83,8 @@ export class PromptBuilderService {
       description += this.formatHealthContext(player);
     }
 
+    // Challenge system - DEACTIVATED
+    /*
     if (player.trait.challenge && !player.challengeResolved) {
       const challenge = player.trait.challenge[lang];
       if (lang === 'fr') {
@@ -87,6 +93,7 @@ export class PromptBuilderService {
         description += ` Remember, you currently face this challenge: ${challenge}`;
       }
     }
+    */
 
     return description;
   }

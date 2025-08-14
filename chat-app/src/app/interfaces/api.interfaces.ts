@@ -2,6 +2,7 @@ export interface ChatRequest {
   playerName: string;
   playerDescription: string;
   mjMessage: string;
+  context?: string; // Conversation context for better AI responses
 }
 
 export interface ChatResponse {

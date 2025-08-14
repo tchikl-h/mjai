@@ -7,6 +7,7 @@ import { ApiService } from './services/api.service';
 import { TraitsService } from './services/traits.service';
 import { ChallengeService } from './services/challenge.service';
 import { GameStateService } from './services/game-state.service';
+import { ChatHistoryService } from './services/chat-history.service';
 import { DiceComponent } from './dice/dice.component';
 import { PlayerCardComponent } from './components/player-card/player-card.component';
 import { LanguageSwitcherComponent } from './components/language-switcher/language-switcher.component';
@@ -53,6 +54,7 @@ export class AppComponent implements OnInit, AfterViewChecked {
     private traitsService: TraitsService,
     private challengeService: ChallengeService,
     protected gameStateService: GameStateService,
+    private chatHistoryService: ChatHistoryService,
     protected i18n: I18nService
   ) {}
 
@@ -74,17 +76,60 @@ export class AppComponent implements OnInit, AfterViewChecked {
     
     // Game state checking - DEACTIVATED (for win/lose screens)
     // this.checkGameState();
+
+    // Expose chat history methods to global scope for console access
+    (window as any).chatHistory = {
+      getAll: () => this.getChatHistory(),
+      getStats: () => this.getChatStats(),
+      export: () => this.exportChatHistory(),
+      clear: () => this.clearChatHistory(),
+      search: (query: string) => this.searchChatHistory(query),
+      getPlayerMessages: (playerName: string) => this.getPlayerMessageHistory(playerName),
+      logStats: () => this.logChatStats(),
+      // New context methods
+      getContext: (playerName: string, messageCount?: number) => {
+        const player = this.gameService.getAllPlayers().find(p => p.name === playerName) as PlayerImpl;
+        if (!player) return `Player "${playerName}" not found. Available: ${this.gameService.getAllPlayers().map(p => p.name).join(', ')}`;
+        return this.chatHistoryService.getContext(player, messageCount);
+      },
+      getCompactContext: (playerName: string, messageCount?: number) => {
+        const player = this.gameService.getAllPlayers().find(p => p.name === playerName) as PlayerImpl;
+        if (!player) return `Player "${playerName}" not found`;
+        return this.chatHistoryService.getCompactContext(player, messageCount);
+      },
+      getCurrentTurnContext: (playerName: string) => {
+        const player = this.gameService.getAllPlayers().find(p => p.name === playerName) as PlayerImpl;
+        if (!player) return `Player "${playerName}" not found`;
+        return this.chatHistoryService.getCurrentTurnContext(player, this.getCurrentTurnNumber());
+      }
+    };
+    
+    console.log('💬 Chat History with Context Available!');
+    console.log('📋 Basic: chatHistory.getAll(), chatHistory.getStats(), chatHistory.export()');
+    console.log('🔍 Search: chatHistory.search("text"), chatHistory.getPlayerMessages("Warrior")');
+    console.log('🎯 Context: chatHistory.getContext("Warrior"), chatHistory.getCompactContext("Mage")');
+    console.log('⚡ Current Turn: chatHistory.getCurrentTurnContext("Rogue")');
   }
 
   async sendMessage() {
     if (this.newMessage.trim()) {
       const mjMessage = this.newMessage;
       
-      this.messages.push({
-          text: mjMessage,
-          sender: 'mj',
-          timestamp: new Date()
-        });
+      // Add MJ message to both display array and history
+      const mjMessageObj = {
+        text: mjMessage,
+        sender: 'mj' as const,
+        timestamp: new Date()
+      };
+      this.messages.push(mjMessageObj);
+      
+      // Store in chat history with current turn number
+      this.chatHistoryService.addMessage(
+        mjMessage, 
+        'mj', 
+        undefined, 
+        this.getCurrentTurnNumber()
+      );
       
       this.newMessage = '';
       
@@ -93,12 +138,22 @@ export class AppComponent implements OnInit, AfterViewChecked {
         const currentPlayer = this.gameService.getCurrentTurn().getCurrentPlayer();
         const playerResponse = await this.apiService.generatePlayerResponse(currentPlayer, mjMessage);
         
-        this.messages.push({
+        // Add player response to both display array and history
+        const playerMessageObj = {
           text: playerResponse,
-          sender: 'player',
+          sender: 'player' as const,
           timestamp: new Date(),
           player: currentPlayer as PlayerImpl
-        });
+        };
+        this.messages.push(playerMessageObj);
+        
+        // Store in chat history with current turn number
+        this.chatHistoryService.addMessage(
+          playerResponse, 
+          'player', 
+          currentPlayer as PlayerImpl, 
+          this.getCurrentTurnNumber()
+        );
 
         // Trigger TTS for the character's response
         this.speakCharacterText(currentPlayer as PlayerImpl, playerResponse);
@@ -114,12 +169,23 @@ export class AppComponent implements OnInit, AfterViewChecked {
         // Fallback to simple response
         const currentPlayer = this.gameService.getCurrentTurn().getCurrentPlayer();
         const fallbackText = 'I listen carefully to your words.';
-        this.messages.push({
+        
+        // Add fallback message to both display array and history
+        const fallbackMessageObj = {
           text: fallbackText,
-          sender: 'player',
+          sender: 'player' as const,
           timestamp: new Date(),
           player: currentPlayer as PlayerImpl
-        });
+        };
+        this.messages.push(fallbackMessageObj);
+        
+        // Store in chat history with current turn number
+        this.chatHistoryService.addMessage(
+          fallbackText, 
+          'player', 
+          currentPlayer as PlayerImpl, 
+          this.getCurrentTurnNumber()
+        );
 
         // Trigger TTS for fallback response
         this.speakCharacterText(currentPlayer as PlayerImpl, fallbackText);
@@ -193,6 +259,17 @@ export class AppComponent implements OnInit, AfterViewChecked {
     this.toggleHealth(event.player, event.heartIndex);
   }
 
+  onPlayerClick(player: PlayerImpl): void {
+    if (player.isAlive()) {
+      const success = this.gameService.setCurrentPlayer(player);
+      if (success) {
+        console.log(`Switched to ${player.name}`);
+      }
+    } else {
+      console.log(`Cannot select ${player.name}: player is eliminated`);
+    }
+  }
+
   private speakCharacterText(player: PlayerImpl, text: string): void {
     // Check if we have a voice mapping for this character
     if (!this.characterVoices[player.name]) {
@@ -251,7 +328,8 @@ export class AppComponent implements OnInit, AfterViewChecked {
     // Reset game state
     this.gameStateService.resetGame();
     
-    // Clear messages
+    // Clear chat history and messages
+    this.chatHistoryService.clearCurrentSession();
     this.messages = [];
     this.newMessage = '';
     
@@ -272,6 +350,46 @@ export class AppComponent implements OnInit, AfterViewChecked {
     // });
     
     console.log('Game restarted');
+  }
+
+  // Chat History Methods
+  getChatHistory() {
+    return this.chatHistoryService.getAllMessages();
+  }
+
+  getChatStats() {
+    return this.chatHistoryService.getSessionStats();
+  }
+
+  exportChatHistory(): string {
+    return this.chatHistoryService.exportChatHistory();
+  }
+
+  clearChatHistory(): void {
+    this.chatHistoryService.clearCurrentSession();
+    this.messages = []; // Clear display messages too
+    console.log('Chat history cleared');
+  }
+
+  searchChatHistory(query: string) {
+    return this.chatHistoryService.searchMessages(query);
+  }
+
+  getPlayerMessageHistory(playerName: string) {
+    return this.chatHistoryService.getMessagesByPlayer(playerName);
+  }
+
+  // Convenience method to log current chat stats to console
+  logChatStats(): void {
+    const stats = this.getChatStats();
+    console.log('=== Chat Session Statistics ===');
+    console.log(`Session Duration: ${stats.sessionDuration} minutes`);
+    console.log(`Total Messages: ${stats.totalMessages}`);
+    console.log(`Player Messages: ${stats.playerMessages}`);
+    console.log(`MJ Messages: ${stats.mjMessages}`);
+    console.log(`Unique Players: ${stats.uniquePlayers}`);
+    console.log(`Average Message Length: ${stats.averageMessageLength} characters`);
+    console.log('================================');
   }
 
   ngAfterViewChecked() {

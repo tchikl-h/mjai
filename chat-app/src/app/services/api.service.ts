@@ -6,6 +6,7 @@ import { ChatRequest, ChatResponse, ApiError, ApiRequestOptions } from '../inter
 import { API_CONFIG } from '../config/api.config';
 import { PromptBuilderService } from './prompt-builder.service';
 import { LoggerService } from './logger.service';
+import { ChatHistoryService } from './chat-history.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,8 @@ export class ApiService {
   constructor(
     private http: HttpClient,
     private promptBuilder: PromptBuilderService,
-    private logger: LoggerService
+    private logger: LoggerService,
+    private chatHistory: ChatHistoryService
   ) {}
 
   async generatePlayerResponse(
@@ -44,12 +46,34 @@ export class ApiService {
     }
   }
 
-  private buildChatRequest(player: PlayerImpl, mjMessage: string): ChatRequest {
-    return {
+  private buildChatRequest(player: PlayerImpl, mjMessage: string, includeContext: boolean = true): ChatRequest {
+    const request: ChatRequest = {
       playerName: player.name,
       playerDescription: this.promptBuilder.buildFullPlayerDescription(player, true),
       mjMessage: this.promptBuilder.buildMessagePrompt(mjMessage)
     };
+
+    // Add conversation context for better AI responses
+    if (includeContext) {
+      try {
+        // Use compact context to manage prompt length
+        const context = this.chatHistory.getContext(player);
+        
+        if (context && context !== "This is the start of our adventure.") {
+          request.context = `Recent conversation:\n${context}\n\nNow respond to the GM's latest message, staying in character and considering the conversation flow above.`;
+        }
+        
+        this.logger.info(`Context generated for ${player.name}`, {
+          contextLength: request.context?.length || 0,
+          messageHistory: this.chatHistory.getCurrentSession().totalMessages
+        });
+      } catch (error) {
+        this.logger.warn('Failed to generate context for API request', error);
+        // Continue without context rather than fail the request
+      }
+    }
+
+    return request;
   }
 
   private async makeChatRequest(

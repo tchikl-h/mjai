@@ -1,5 +1,5 @@
 // dice.component.ts
-import { Component, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -42,12 +42,14 @@ import { CommonModule } from '@angular/common';
     }
   `]
 })
-export class DiceComponent implements AfterViewInit {
+export class DiceComponent implements AfterViewInit, OnDestroy {
   @ViewChild('diceContainer', { static: false }) container!: ElementRef;
   lastRoll: number | null = null;
   isRolling = false;
   displayValue = '🎲';
   private diceAudio: HTMLAudioElement;
+  private resetTimer: any = null;
+  private readonly resetTime = 5000;
 
   constructor() {
     // Initialize the audio element
@@ -62,9 +64,23 @@ export class DiceComponent implements AfterViewInit {
     console.log('Dice component initialized successfully');
   }
 
+  ngOnDestroy() {
+    // Clean up timer when component is destroyed
+    if (this.resetTimer) {
+      clearTimeout(this.resetTimer);
+      this.resetTimer = null;
+    }
+  }
+
   async rollD20() {
     if (this.isRolling) {
       return; // Prevent multiple simultaneous rolls
+    }
+
+    // Clear any existing timer when starting a new roll
+    if (this.resetTimer) {
+      clearTimeout(this.resetTimer);
+      this.resetTimer = null;
     }
 
     this.isRolling = true;
@@ -92,11 +108,35 @@ export class DiceComponent implements AfterViewInit {
       this.displayValue = finalRoll.toString();
 
       console.log('Rolled D20:', finalRoll);
+
+      // Clear any existing timer
+      if (this.resetTimer) {
+        clearTimeout(this.resetTimer);
+      }
+
+      // Set timer to reset to dice icon after 15 seconds
+      this.resetTimer = setTimeout(() => {
+        this.displayValue = '🎲';
+        this.resetTimer = null;
+      }, this.resetTime);
+
     } catch (error) {
       console.error('Error during dice roll:', error);
       // Fallback
       this.lastRoll = Math.floor(Math.random() * 20) + 1;
       this.displayValue = this.lastRoll.toString();
+
+      // Clear any existing timer
+      if (this.resetTimer) {
+        clearTimeout(this.resetTimer);
+      }
+
+      // Set timer to reset to dice icon after 15 seconds
+      this.resetTimer = setTimeout(() => {
+        this.displayValue = '🎲';
+        this.resetTimer = null;
+      }, this.resetTime);
+
     } finally {
       this.isRolling = false;
     }

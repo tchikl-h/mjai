@@ -15,8 +15,10 @@ export class PlayerCardComponent {
   @Input() player!: PlayerImpl;
   @Input() isCurrentPlayer: boolean = false;
   @Input() showControls: boolean = true;
+  @Input() clickable: boolean = false;
   @Input() size: 'small' | 'normal' = 'normal';
   @Output() healthToggle = new EventEmitter<{ player: PlayerImpl, heartIndex: number }>();
+  @Output() playerClick = new EventEmitter<PlayerImpl>();
 
   constructor(
     private traitsService: TraitsService,
@@ -26,6 +28,12 @@ export class PlayerCardComponent {
   onHealthToggle(heartIndex: number): void {
     if (this.showControls) {
       this.healthToggle.emit({ player: this.player, heartIndex });
+    }
+  }
+
+  onClick(): void {
+    if (this.clickable) {
+      this.playerClick.emit(this.player);
     }
   }
 

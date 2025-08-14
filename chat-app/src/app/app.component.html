@@ -34,7 +34,9 @@
         [player]="player"
         [isCurrentPlayer]="isCurrentPlayer(player)"
         [showControls]="true"
-        (healthToggle)="onHealthToggle($event)">
+        [clickable]="player.isAlive()"
+        (healthToggle)="onHealthToggle($event)"
+        (playerClick)="onPlayerClick($event)">
       </app-player-card>
     </div>
   </div>

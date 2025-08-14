@@ -2,8 +2,12 @@
      [ngClass]="{
        'current-player': isCurrentPlayer,
        'eliminated-player': !player.isAlive(),
-       'small': size === 'small'
-     }">
+       'small': size === 'small',
+       'clickable': clickable
+     }"
+     (click)="onClick()"
+     [style.cursor]="clickable ? 'pointer' : 'default'"
+     [title]="clickable ? 'Click to make ' + player.name + ' the active player' : ''">
   
   <div class="player-info">
     <div class="avatar-container">
@@ -23,7 +27,7 @@
           [class.empty]="i >= player.health"
           [class.disabled]="!player.isAlive() || !showControls"
           [class.small]="size === 'small'"
-          (click)="onHealthToggle(i)"
+          (click)="onHealthToggle(i); $event.stopPropagation()"
           [title]="!player.isAlive() ? i18n.translate('player.eliminated') : !showControls ? '' : (i < player.health ? i18n.translate('health.remove') : i18n.translate('health.add'))">
           {{ i < player.health ? '❤️' : '🤍' }}
         </span>

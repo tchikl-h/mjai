@@ -75,4 +75,21 @@ export class GameService {
   startNewTurn(): void {
     this.generateNewTurn();
   }
+
+  setCurrentPlayer(player: Player): boolean {
+    const turnOrder = this.currentTurn.turnOrder;
+    const playerIndex = turnOrder.findIndex(p => p === player);
+    
+    if (playerIndex !== -1 && player.isAlive()) {
+      this.currentTurn.currentPlayerIndex = playerIndex;
+      console.log(`Manually set current player to: ${player.name}`);
+      return true;
+    } else if (!player.isAlive()) {
+      console.log(`Cannot set current player to ${player.name}: player is not alive`);
+      return false;
+    } else {
+      console.log(`Cannot set current player to ${player.name}: player not in current turn order`);
+      return false;
+    }
+  }
 }
