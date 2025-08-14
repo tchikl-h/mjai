@@ -39,6 +39,16 @@
         (playerClick)="onPlayerClick($event)">
       </app-player-card>
     </div>
+
+    <!-- New Turn Button -->
+    <div class="new-turn-controls">
+      <button 
+        (click)="startNewTurn()" 
+        class="new-turn-button"
+        [title]="'Start new turn with reshuffled player order'">
+        🔄 New Turn
+      </button>
+    </div>
   </div>
 
   <!-- Center - Chat -->
@@ -106,6 +116,7 @@
         class="message-input">
       <button (click)="sendMessage()" class="send-button">{{ i18n.translate('send.button') }}</button>
     </div>
+
   </div>
 
   <!-- Top Right - Dice Roller & Challenges -->

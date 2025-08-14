@@ -157,9 +157,6 @@ export class AppComponent implements OnInit, AfterViewChecked {
 
         // Trigger TTS for the character's response
         this.speakCharacterText(currentPlayer as PlayerImpl, playerResponse);
-        
-        // Move to next player
-        this.gameService.nextPlayer();
 
         // Game state checking - DEACTIVATED
         // this.checkGameState();
@@ -189,9 +186,6 @@ export class AppComponent implements OnInit, AfterViewChecked {
 
         // Trigger TTS for fallback response
         this.speakCharacterText(currentPlayer as PlayerImpl, fallbackText);
-        
-        // Move to next player
-        this.gameService.nextPlayer();
 
         // Game state checking - DEACTIVATED
         // this.checkGameState();
@@ -270,6 +264,12 @@ export class AppComponent implements OnInit, AfterViewChecked {
     }
   }
 
+
+  startNewTurn(): void {
+    this.gameService.manualNextTurn();
+    console.log('New turn started with fresh player order');
+  }
+
   private speakCharacterText(player: PlayerImpl, text: string): void {
     // Check if we have a voice mapping for this character
     if (!this.characterVoices[player.name]) {
@@ -340,8 +340,8 @@ export class AppComponent implements OnInit, AfterViewChecked {
       player.challengeResolved = false;
     });
     
-    // Generate new turn order
-    this.gameService.generateNewTurn();
+    // Reset players to properly initialize first turn at turn 1
+    this.gameService.setPlayers(allPlayers);
     
     // Trait reassignment - DEACTIVATED
     // const randomTraits = this.traitsService.getRandomTraits(4);

@@ -13,7 +13,29 @@ export class GameService {
 
   setPlayers(players: Player[]): void {
     this.players = players;
-    this.generateNewTurn();
+    this.initializeFirstTurn();
+  }
+
+  private initializeFirstTurn(): void {
+    const alivePlayers = this.players.filter(player => player.isAlive());
+    
+    if (alivePlayers.length === 0) {
+      console.log('No players alive! Game over.');
+      this.currentTurn = new TurnImpl([], 0, 1);
+      return;
+    }
+
+    // Shuffle alive players randomly
+    const shuffledPlayers = this.shuffleArray([...alivePlayers]);
+    
+    const turnOrder: (Player)[] = [];
+    
+    for (let i = 0; i < shuffledPlayers.length; i++) {
+      turnOrder.push(shuffledPlayers[i]);
+    }
+    
+    console.log(`Initial turn 1 generated with ${alivePlayers.length} alive players:`, turnOrder.map(p => p.name));
+    this.currentTurn = new TurnImpl(turnOrder, 0, 1); // Start at turn 1
   }
 
   generateNewTurn(): void {
@@ -34,8 +56,9 @@ export class GameService {
       turnOrder.push(shuffledPlayers[i]);
     }
     
-    console.log(`New turn generated with ${alivePlayers.length} alive players:`, turnOrder.map(p => p.name));
-    this.currentTurn = new TurnImpl(turnOrder, 0, this.currentTurn.turnNumber);
+    const newTurnNumber = this.currentTurn.turnNumber + 1;
+    console.log(`New turn ${newTurnNumber} generated with ${alivePlayers.length} alive players:`, turnOrder.map(p => p.name));
+    this.currentTurn = new TurnImpl(turnOrder, 0, newTurnNumber);
   }
 
   private shuffleArray<T>(array: T[]): T[] {
@@ -52,16 +75,17 @@ export class GameService {
   }
 
   nextPlayer(): Player {
+    // Manual turn advancement - no automatic new turn generation
     const nextPlayer = this.currentTurn.nextPlayer();
-    
-    // Check if we're starting a new turn (currentPlayerIndex wrapped to 0)
-    if (this.currentTurn.isNewTurnStarting()) {
-      console.log(`New turn ${this.currentTurn.turnNumber} starting! Generating new turn order...`);
-      this.generateNewTurn();
-      return this.currentTurn.getCurrentPlayer();
-    }
-    
+    console.log(`Moving to next player: ${nextPlayer.name}`);
     return nextPlayer;
+  }
+
+  // New method for manual new turn generation when round is complete
+  manualNextTurn(): void {
+    const nextTurnNumber = this.currentTurn.turnNumber + 1;
+    console.log(`Manually starting new turn ${nextTurnNumber}...`);
+    this.generateNewTurn();
   }
 
   getAlivePlayers(): Player[] {
