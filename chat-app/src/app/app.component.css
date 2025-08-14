@@ -1,15 +1,20 @@
 .app-container {
-  display: flex;
+  display: grid;
+  grid-template-columns: 300px 1fr 320px;
+  grid-template-rows: auto 1fr;
+  grid-template-areas: 
+    "left-sidebar chat dice-roller"
+    "left-sidebar chat dice-roller";
   height: 100vh;
   background-color: #1f1f1f;
 }
 
 .chat-container {
+  grid-area: chat;
   display: flex;
   flex-direction: column;
-  flex: 1;
-  max-width: 800px;
   background-color: #2d2d2d;
+  border-left: 1px solid #404040;
   border-right: 1px solid #404040;
 }
 
@@ -194,13 +199,23 @@
   background: #555;
 }
 
-/* Turn Order Sidebar */
-.turn-order-sidebar {
-  width: 300px;
+/* Turn Order Sidebar - Left */
+.turn-order-sidebar.left {
+  grid-area: left-sidebar;
+  background-color: #2d2d2d;
+  border-right: 1px solid #404040;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Dice Section - Top Right */
+.dice-section.top-right {
+  grid-area: dice-roller;
   background-color: #2d2d2d;
   border-left: 1px solid #404040;
   display: flex;
   flex-direction: column;
+  max-height: 100vh;
 }
 
 .sidebar-header {
@@ -314,4 +329,41 @@
 
 .turn-list::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+/* Dice Section Specific Styles */
+.dice-section.top-right .sidebar-header {
+  padding: 0.75rem 1rem;
+}
+
+.dice-section.top-right .sidebar-header h3 {
+  font-size: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .app-container {
+    grid-template-columns: 250px 1fr 280px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .app-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-areas: 
+      "dice-roller"
+      "left-sidebar"
+      "chat"
+      "chat";
+  }
+  
+  .turn-order-sidebar.left,
+  .dice-section.top-right {
+    max-height: 200px;
+  }
+  
+  .turn-list {
+    max-height: 120px;
+  }
 }

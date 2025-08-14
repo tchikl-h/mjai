@@ -47,6 +47,15 @@ export class DiceComponent implements AfterViewInit {
   lastRoll: number | null = null;
   isRolling = false;
   displayValue = '🎲';
+  private diceAudio: HTMLAudioElement;
+
+  constructor() {
+    // Initialize the audio element
+    this.diceAudio = new Audio();
+    this.diceAudio.src = '/assets/sounds/rolling-dice.mp3';
+    this.diceAudio.preload = 'auto';
+    this.diceAudio.volume = 0.7; // Set volume to 70%
+  }
 
   ngAfterViewInit() {
     // Simple 2D dice component - no complex 3D initialization needed
@@ -62,6 +71,9 @@ export class DiceComponent implements AfterViewInit {
     this.displayValue = '🎲';
 
     try {
+      // Play dice rolling sound
+      await this.playDiceSound();
+
       // Simulate rolling animation
       const rollDuration = 1000; // 1 second
       const animationSteps = 10;
@@ -87,6 +99,21 @@ export class DiceComponent implements AfterViewInit {
       this.displayValue = this.lastRoll.toString();
     } finally {
       this.isRolling = false;
+    }
+  }
+
+  private async playDiceSound(): Promise<void> {
+    try {
+      // Reset the audio to the beginning in case it was played before
+      this.diceAudio.currentTime = 0;
+      
+      // Play the sound
+      await this.diceAudio.play();
+      console.log('Dice rolling sound played successfully');
+    } catch (error) {
+      // Handle audio playback errors (e.g., user hasn't interacted with page yet)
+      console.warn('Could not play dice rolling sound:', error);
+      // Don't throw the error - just log it and continue with the roll
     }
   }
 
