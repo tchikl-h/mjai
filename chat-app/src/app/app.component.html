@@ -1,4 +1,22 @@
-<div class="app-container">
+<!-- Win Screen Overlay -->
+<app-win-screen
+  *ngIf="gameStateService.status() === 'won'"
+  [players]="gameService.getAllPlayers()"
+  [endReason]="gameStateService.endReason()!"
+  [finalTurn]="getCurrentTurnNumber()"
+  (restart)="onRestart()">
+</app-win-screen>
+
+<!-- Game Over Screen Overlay -->
+<app-game-over-screen
+  *ngIf="gameStateService.status() === 'lost_all_dead' || gameStateService.status() === 'lost_too_many_turns'"
+  [players]="gameService.getAllPlayers()"
+  [endReason]="gameStateService.endReason()!"
+  [finalTurn]="getCurrentTurnNumber()"
+  (restart)="onRestart()">
+</app-game-over-screen>
+
+<div class="app-container" [style.display]="gameStateService.isGameOver() ? 'none' : 'grid'">
   <!-- Left Sidebar - Turn Order -->
   <div class="turn-order-sidebar left">
     <div class="sidebar-header">
@@ -92,4 +110,18 @@
     
     <app-challenges-list [players]="gameService.getAllPlayers()"></app-challenges-list>
   </div>
+
+  <!-- Hidden TTS Component for Character Speech -->
+  <app-eleven-tts
+    #ttsComponent
+    [npcName]="currentSpeakingCharacter"
+    [text]="currentSpeechText"
+    [voices]="characterVoices"
+    [stability]="0.4"
+    [similarityBoost]="0.8"
+    [style]="0.3"
+    [useSpeakerBoost]="true"
+    backendUrl="http://localhost:3001/api/tts"
+    [style.display]="'none'">
+  </app-eleven-tts>
 </div>
