@@ -131,6 +131,7 @@ export class ApiService {
     return apiError;
   }
 
+
   // Utility method for testing API connectivity
   async testApiConnection(): Promise<boolean> {
     try {

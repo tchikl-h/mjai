@@ -1,5 +1,6 @@
 import { Component, Input, Signal, WritableSignal, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { VoiceDesignRequest, VoiceDesignResponse } from '../../interfaces/api.interfaces';
 
 /**
  * ElevenTtsComponent
@@ -8,25 +9,18 @@ import { CommonModule } from '@angular/common';
  *
  * Features
  * - Per-NPC voice selection via @Input() voices map or direct @Input() voiceId
- * - Works with a secure backend proxy (recommended) OR directly with ElevenLabs API (not recommended for production)
+ * - Works with a secure backend proxy for TTS and Voice Design functionality
  * - Simple UI: Play/Stop button, optional voice dropdown, progress/loader state
  * - Emits audio using an <audio> element with a blob URL
+ * - Voice Design: Generate custom voices from text descriptions
+ * - Speech-to-Text: Transcribe audio recordings
  *
- * Usage (recommended backend proxy mode):
+ * Usage:
  * <app-eleven-tts
  *   [npcName]="'Tharok the Orc'"
  *   [text]="currentLine"
  *   [voices]="{ 'Tharok the Orc': 'EXAVITQu4vr4xnSDxMaL', 'Elyra the Elf': 'TxGEqnHWrfWFTfGW9XjX' }"
- *   backendUrl="/api/tts"  // your serverless function that proxies ElevenLabs
- * ></app-eleven-tts>
- *
- * Direct mode (dev only; exposes API key in browser):
- * <app-eleven-tts
- *   [npcName]="'Tharok the Orc'"
- *   [text]="currentLine"
- *   [voices]="voicesMap"
- *   [useDirectApi]="true"
- *   elevenApiKey="YOUR_ELEVENLABS_API_KEY"
+ *   backendUrl="/api/tts"  // your backend endpoint that proxies ElevenLabs
  * ></app-eleven-tts>
  */
 
@@ -75,10 +69,6 @@ export class ElevenTtsComponent {
   /** Backend proxy endpoint (recommended): expects POST { text, voiceId, settings? } -> audio/mpeg */
   @Input() backendUrl: string | null = null;
 
-  /** Direct-to-ElevenLabs mode (dev only). If true, you must also provide elevenApiKey. */
-  @Input() useDirectApi = false;
-  /** Your ElevenLabs API key (only used in useDirectApi mode). Do NOT use this in production UI. */
-  @Input() elevenApiKey: string | null = null;
 
   /** Optional voice settings forwarded to ElevenLabs */
   @Input() stability = 0.4;
@@ -96,6 +86,7 @@ export class ElevenTtsComponent {
   audioUrl: WritableSignal<string | null> = signal(null);
   isPlaying: WritableSignal<boolean> = signal(false);
   selectedVoiceId: WritableSignal<string | null> = signal(null);
+
 
   constructor() {
     // Keep play state in sync
@@ -159,9 +150,7 @@ export class ElevenTtsComponent {
 
     try {
       this.loading.set(true);
-      const blob = this.useDirectApi
-        ? await this.fetchDirectFromElevenLabs(voiceId, this.text)
-        : await this.fetchFromBackendProxy(voiceId, this.text);
+      const blob = await this.fetchFromBackendProxy(voiceId, this.text);
 
       const url = URL.createObjectURL(blob);
       // revoke previous URL if any
@@ -205,12 +194,12 @@ export class ElevenTtsComponent {
 
   private async fetchFromBackendProxy(voiceId: string, text: string): Promise<Blob> {
     if (!this.backendUrl) {
-      throw new Error('backendUrl is not set. Either provide backendUrl or enable useDirectApi (dev only).');
+      throw new Error('backendUrl is not set. Please provide backendUrl for TTS functionality.');
     }
     const res = await fetch(this.backendUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ voiceId, text: 'Vous avez tout à fait raison, faisons cela !', voice_settings: this.buildVoiceSettings() })
+      body: JSON.stringify({ voiceId, text, voice_settings: this.buildVoiceSettings() })
     });
     if (!res.ok) {
       const msg = await safeReadText(res);
@@ -219,24 +208,6 @@ export class ElevenTtsComponent {
     return await res.blob(); // expect audio/mpeg
   }
 
-  private async fetchDirectFromElevenLabs(voiceId: string, text: string): Promise<Blob> {
-    if (!this.elevenApiKey) throw new Error('elevenApiKey is required for direct mode.');
-    const endpoint = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'xi-api-key': this.elevenApiKey,
-        'Content-Type': 'application/json',
-        'Accept': 'audio/mpeg'
-      },
-      body: JSON.stringify({ text, voice_settings: this.buildVoiceSettings() })
-    });
-    if (!res.ok) {
-      const msg = await safeReadText(res);
-      throw new Error(`ElevenLabs API failed: ${res.status} ${res.statusText} — ${msg}`);
-    }
-    return await res.blob();
-  }
 
   private buildVoiceSettings() {
     return {
@@ -245,6 +216,108 @@ export class ElevenTtsComponent {
       style: this.style,
       use_speaker_boost: this.useSpeakerBoost
     };
+  }
+
+  /** Voice design method for text-to-speech generation using backend proxy */
+  async designVoice(request: VoiceDesignRequest): Promise<VoiceDesignResponse> {
+    this.error.set(null);
+    
+    try {
+      this.loading.set(true);
+      const blob = await this.fetchVoiceDesignFromBackendProxy(request);
+      
+      const url = URL.createObjectURL(blob);
+      // Revoke previous URL if any
+      const prev = this.audioUrl();
+      if (prev) URL.revokeObjectURL(prev);
+      this.audioUrl.set(url);
+
+      // Play via internal audio element
+      this._audio.src = url;
+      
+      // Add error handling for audio loading
+      this._audio.onerror = (e) => {
+        console.error('Audio error:', e);
+        this.error.set('Failed to load generated audio. The audio format may not be supported.');
+      };
+      
+      this._audio.oncanplay = () => {
+        console.log('Audio can play, starting playback...');
+      };
+      
+      await this._audio.play();
+      
+      return { success: true };
+      
+    } catch (err: any) {
+      console.error(err);
+      this.error.set(err?.message ?? 'Failed to generate voice');
+      return {
+        success: false,
+        error: err?.message ?? 'Failed to generate voice'
+      };
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  private async fetchVoiceDesignFromBackendProxy(request: VoiceDesignRequest): Promise<Blob> {
+    if (!this.backendUrl) {
+      throw new Error('backendUrl is not set. Please provide backendUrl for voice design functionality.');
+    }
+    
+    // Use the voice-design endpoint
+    const voiceDesignUrl = this.backendUrl.replace('/api/tts', '/api/voice-design');
+    
+    const res = await fetch(voiceDesignUrl, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'audio/mpeg, audio/wav, audio/*, application/json'
+      },
+      body: JSON.stringify(request)
+    });
+    
+    if (!res.ok) {
+      const msg = await safeReadText(res);
+      throw new Error(`Backend Voice Design failed: ${res.status} ${res.statusText} — ${msg}`);
+    }
+    
+    const contentType = res.headers.get('content-type') || '';
+    console.log('Response content-type:', contentType);
+    
+    // Check if response is JSON (backend might return { audio_base64: "..." })
+    if (contentType.includes('application/json')) {
+      const jsonResponse = await res.json();
+      console.log('JSON response received:', Object.keys(jsonResponse));
+      
+      if (jsonResponse.audio_base64) {
+        // Convert base64 to blob
+        const byteCharacters = atob(jsonResponse.audio_base64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        return new Blob([byteArray], { type: 'audio/mpeg' });
+      } else {
+        throw new Error('No audio_base64 found in response');
+      }
+    } else {
+      // Response is direct audio blob
+      const blob = await res.blob();
+      console.log('Voice design blob received:', {
+        size: blob.size,
+        type: blob.type
+      });
+      
+      // Ensure proper MIME type for audio playback
+      if (!blob.type || !blob.type.startsWith('audio/')) {
+        return new Blob([blob], { type: 'audio/mpeg' });
+      }
+      
+      return blob;
+    }
   }
 
   /** Speech-to-text using backend proxy */
