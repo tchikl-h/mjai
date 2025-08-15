@@ -63,7 +63,11 @@ export class AppComponent implements OnInit, AfterViewChecked {
   ) {}
 
   ngOnInit() {
-    // Trait system - DEACTIVATED - Using dummy trait to satisfy constructor
+    this.initializePlayers();
+    this.setupChatHistoryConsoleAccess();
+  }
+
+  private initializePlayers(): void {
     const dummyTrait = {
       name: { en: 'None', fr: 'Aucun' },
       description: { en: 'No trait', fr: 'Aucun trait' },
@@ -77,11 +81,9 @@ export class AppComponent implements OnInit, AfterViewChecked {
       new PlayerImpl("Hunter", "Wrapped in a weathered cloak of mottled greens and browns, Kaelen blends into the wild as naturally as wind through leaves. A longbow rests easily in his hand, its grip worn smooth from years of use. His sharp eyes miss nothing, tracking prey—or threats—with the patience of a predator. Quiet and steady, Kaelen speaks in few words, each rooted in the rhythm of the hunt.", "assets/images/hunter.png", dummyTrait),
     ];
     this.gameService.setPlayers(players);
-    
-    // Game state checking - DEACTIVATED (for win/lose screens)
-    // this.checkGameState();
+  }
 
-    // Expose chat history methods to global scope for console access
+  private setupChatHistoryConsoleAccess(): void {
     (window as any).chatHistory = {
       getAll: () => this.getChatHistory(),
       getStats: () => this.getChatStats(),
@@ -90,7 +92,6 @@ export class AppComponent implements OnInit, AfterViewChecked {
       search: (query: string) => this.searchChatHistory(query),
       getPlayerMessages: (playerName: string) => this.getPlayerMessageHistory(playerName),
       logStats: () => this.logChatStats(),
-      // New context methods
       getContext: (playerName: string, messageCount?: number) => {
         const player = this.gameService.getAllPlayers().find(p => p.name === playerName) as PlayerImpl;
         if (!player) return `Player "${playerName}" not found. Available: ${this.gameService.getAllPlayers().map(p => p.name).join(', ')}`;
@@ -118,82 +119,9 @@ export class AppComponent implements OnInit, AfterViewChecked {
   async sendMessage() {
     if (this.newMessage.trim()) {
       const mjMessage = this.newMessage;
-      
-      // Add MJ message to both display array and history
-      const mjMessageObj = {
-        text: mjMessage,
-        sender: 'mj' as const,
-        timestamp: new Date()
-      };
-      this.messages.push(mjMessageObj);
-      
-      // Store in chat history with current turn number
-      this.chatHistoryService.addMessage(
-        mjMessage, 
-        'mj', 
-        undefined, 
-        this.getCurrentTurnNumber()
-      );
-      
+      this.addMJMessage(mjMessage);
       this.newMessage = '';
-      
-      // Generate AI response from the current player
-      try {
-        const currentPlayer = this.gameService.getCurrentTurn().getCurrentPlayer();
-        const playerResponse = await this.apiService.generatePlayerResponse(currentPlayer, mjMessage);
-        
-        // Add player response to both display array and history
-        const playerMessageObj = {
-          text: playerResponse,
-          sender: 'player' as const,
-          timestamp: new Date(),
-          player: currentPlayer as PlayerImpl
-        };
-        this.messages.push(playerMessageObj);
-        
-        // Store in chat history with current turn number
-        this.chatHistoryService.addMessage(
-          playerResponse, 
-          'player', 
-          currentPlayer as PlayerImpl, 
-          this.getCurrentTurnNumber()
-        );
-
-        // Trigger TTS for the character's response
-        this.speakCharacterText(currentPlayer as PlayerImpl, playerResponse);
-
-        // Game state checking - DEACTIVATED
-        // this.checkGameState();
-      } catch (error) {
-        console.error('Error generating player response:', error);
-        
-        // Fallback to simple response
-        const currentPlayer = this.gameService.getCurrentTurn().getCurrentPlayer();
-        const fallbackText = 'I listen carefully to your words.';
-        
-        // Add fallback message to both display array and history
-        const fallbackMessageObj = {
-          text: fallbackText,
-          sender: 'player' as const,
-          timestamp: new Date(),
-          player: currentPlayer as PlayerImpl
-        };
-        this.messages.push(fallbackMessageObj);
-        
-        // Store in chat history with current turn number
-        this.chatHistoryService.addMessage(
-          fallbackText, 
-          'player', 
-          currentPlayer as PlayerImpl, 
-          this.getCurrentTurnNumber()
-        );
-
-        // Trigger TTS for fallback response
-        this.speakCharacterText(currentPlayer as PlayerImpl, fallbackText);
-
-        // Game state checking - DEACTIVATED
-        // this.checkGameState();
-      }
+      await this.generatePlayerResponse(mjMessage);
     }
   }
 
@@ -204,6 +132,7 @@ export class AppComponent implements OnInit, AfterViewChecked {
     }
   }
 
+  // ===== GAME STATE METHODS =====
   getTurnOrder(): PlayerImpl[] {
     return this.gameService.getCurrentTurn().turnOrder;
   }
@@ -240,19 +169,12 @@ export class AppComponent implements OnInit, AfterViewChecked {
     return turnOrder[currentIndex] === player;
   }
 
-  // Trait methods - DEACTIVATED
-  /*
-  getTraitIcon(traitName: string | LocalizedText): string {
-    return this.traitsService.getTraitIcon(traitName);
+  startNewTurn(): void {
+    this.gameService.manualNextTurn();
+    console.log('New turn started with fresh player order');
   }
 
-  getPlayerTraitTooltip(player: PlayerImpl): string {
-    const name = this.traitsService.getLocalizedTraitName(player.trait);
-    const description = this.traitsService.getLocalizedTraitDescription(player.trait);
-    return `${name}: ${description}`;
-  }
-  */
-
+  // ===== PLAYER INTERACTION METHODS =====
   onHealthToggle(event: { player: PlayerImpl, heartIndex: number }): void {
     this.toggleHealth(event.player, event.heartIndex);
   }
@@ -268,12 +190,33 @@ export class AppComponent implements OnInit, AfterViewChecked {
     }
   }
 
-
-  startNewTurn(): void {
-    this.gameService.manualNextTurn();
-    console.log('New turn started with fresh player order');
+  toggleHealth(player: PlayerImpl, heartIndex: number): void {
+    const previousHealth = player.health;
+    
+    if (heartIndex < player.health) {
+      // Click on a filled heart - decrease health
+      player.health = heartIndex;
+    } else {
+      // Click on an empty heart - set health to that level + 1
+      player.health = heartIndex + 1;
+    }
+    
+    // Ensure health stays within bounds (0-3)
+    player.health = Math.max(0, Math.min(3, player.health));
+    
+    console.log(`${player.name} health changed to: ${player.health}`);
+    
+    // Check if player died or was revived
+    if (previousHealth > 0 && player.health === 0) {
+      console.log(`${player.name} ${this.i18n.translate('player.died')}`);
+      this.gameService.generateNewTurn();
+    } else if (previousHealth === 0 && player.health > 0) {
+      console.log(`${player.name} ${this.i18n.translate('player.revived')}`);
+      this.gameService.generateNewTurn();
+    }
   }
 
+  // ===== AUDIO & RECORDING METHODS =====
   toggleMute(): void {
     this.muteService.toggle();
   }
@@ -306,78 +249,60 @@ export class AppComponent implements OnInit, AfterViewChecked {
   }
 
   private async addGMMessage(text: string): Promise<void> {
-    const gmMessage = {
+    this.addMJMessage(text);
+    console.log('Added GM message from voice:', text);
+    await this.generatePlayerResponse(text);
+  }
+
+  private addMJMessage(text: string): void {
+    const mjMessage = {
       text: text,
       sender: 'mj' as const,
       timestamp: new Date()
     };
+    this.messages.push(mjMessage);
     
-    this.messages.push(gmMessage);
-    
-    // Store in chat history with current turn number
     this.chatHistoryService.addMessage(
       text, 
       'mj', 
       undefined, 
       this.getCurrentTurnNumber()
     );
-    
-    console.log('Added GM message from voice:', text);
+  }
 
-    // Generate AI response from the current player
+  private async generatePlayerResponse(mjMessage: string): Promise<void> {
     try {
       const currentPlayer = this.gameService.getCurrentTurn().getCurrentPlayer();
-      const playerResponse = await this.apiService.generatePlayerResponse(currentPlayer, text);
-      
-      // Add player response to both display array and history
-      const playerMessageObj = {
-        text: playerResponse,
-        sender: 'player' as const,
-        timestamp: new Date(),
-        player: currentPlayer as PlayerImpl
-      };
-      this.messages.push(playerMessageObj);
-      
-      // Store in chat history with current turn number
-      this.chatHistoryService.addMessage(
-        playerResponse, 
-        'player', 
-        currentPlayer as PlayerImpl, 
-        this.getCurrentTurnNumber()
-      );
-
-      // Trigger TTS for the character's response
+      const playerResponse = await this.apiService.generatePlayerResponse(currentPlayer, mjMessage);
+      this.addPlayerMessage(playerResponse, currentPlayer as PlayerImpl);
       this.speakCharacterText(currentPlayer as PlayerImpl, playerResponse);
-
     } catch (error) {
       console.error('Error generating player response:', error);
-      
-      // Fallback to simple response
       const currentPlayer = this.gameService.getCurrentTurn().getCurrentPlayer();
       const fallbackText = 'I listen carefully to your words.';
-      
-      // Add fallback message to both display array and history
-      const fallbackMessageObj = {
-        text: fallbackText,
-        sender: 'player' as const,
-        timestamp: new Date(),
-        player: currentPlayer as PlayerImpl
-      };
-      this.messages.push(fallbackMessageObj);
-      
-      // Store in chat history with current turn number
-      this.chatHistoryService.addMessage(
-        fallbackText, 
-        'player', 
-        currentPlayer as PlayerImpl, 
-        this.getCurrentTurnNumber()
-      );
-
-      // Trigger TTS for fallback response
+      this.addPlayerMessage(fallbackText, currentPlayer as PlayerImpl);
       this.speakCharacterText(currentPlayer as PlayerImpl, fallbackText);
     }
   }
 
+  private addPlayerMessage(text: string, player: PlayerImpl): void {
+    const playerMessage = {
+      text: text,
+      sender: 'player' as const,
+      timestamp: new Date(),
+      player: player
+    };
+    this.messages.push(playerMessage);
+    
+    this.chatHistoryService.addMessage(
+      text, 
+      'player', 
+      player, 
+      this.getCurrentTurnNumber()
+    );
+  }
+
+  // ===== TTS METHODS =====
   private speakCharacterText(player: PlayerImpl, text: string): void {
     // Check if voices are muted
     if (this.muteService.isMuted()) {
@@ -431,13 +356,7 @@ export class AppComponent implements OnInit, AfterViewChecked {
     return cleaned;
   }
 
-  private checkGameState(): void {
-    const allPlayers = this.gameService.getAllPlayers() as PlayerImpl[];
-    const currentTurnNumber = this.getCurrentTurnNumber();
-    
-    this.gameStateService.updateGameState(allPlayers, currentTurnNumber);
-  }
-
+  // ===== GAME MANAGEMENT METHODS =====
   onRestart(): void {
     // Reset game state
     this.gameStateService.resetGame();
@@ -457,16 +376,10 @@ export class AppComponent implements OnInit, AfterViewChecked {
     // Reset players to properly initialize first turn at turn 1
     this.gameService.setPlayers(allPlayers);
     
-    // Trait reassignment - DEACTIVATED
-    // const randomTraits = this.traitsService.getRandomTraits(4);
-    // allPlayers.forEach((player, index) => {
-    //   player.trait = randomTraits[index];
-    // });
-    
     console.log('Game restarted');
   }
 
-  // Chat History Methods
+  // ===== CHAT HISTORY METHODS =====
   getChatHistory() {
     return this.chatHistoryService.getAllMessages();
   }
@@ -481,7 +394,7 @@ export class AppComponent implements OnInit, AfterViewChecked {
 
   clearChatHistory(): void {
     this.chatHistoryService.clearCurrentSession();
-    this.messages = []; // Clear display messages too
+    this.messages = [];
     console.log('Chat history cleared');
   }
 
@@ -493,7 +406,6 @@ export class AppComponent implements OnInit, AfterViewChecked {
     return this.chatHistoryService.getMessagesByPlayer(playerName);
   }
 
-  // Convenience method to log current chat stats to console
   logChatStats(): void {
     const stats = this.getChatStats();
     console.log('=== Chat Session Statistics ===');
@@ -506,38 +418,9 @@ export class AppComponent implements OnInit, AfterViewChecked {
     console.log('================================');
   }
 
+  // ===== LIFECYCLE & UTILITY METHODS =====
   ngAfterViewChecked() {
     this.scrollToBottom();
-  }
-
-  toggleHealth(player: PlayerImpl, heartIndex: number): void {
-    const previousHealth = player.health;
-    
-    if (heartIndex < player.health) {
-      // Click on a filled heart - decrease health
-      player.health = heartIndex;
-    } else {
-      // Click on an empty heart - set health to that level + 1
-      player.health = heartIndex + 1;
-    }
-    
-    // Ensure health stays within bounds (0-3)
-    player.health = Math.max(0, Math.min(3, player.health));
-    
-    console.log(`${player.name} health changed to: ${player.health}`);
-    
-    // Check if player died or was revived
-    if (previousHealth > 0 && player.health === 0) {
-      console.log(`${player.name} ${this.i18n.translate('player.died')}`);
-      this.gameService.generateNewTurn();
-      // Game state checking - DEACTIVATED
-      // this.checkGameState();
-    } else if (previousHealth === 0 && player.health > 0) {
-      console.log(`${player.name} ${this.i18n.translate('player.revived')}`);
-      this.gameService.generateNewTurn();
-      // Game state checking - DEACTIVATED
-      // this.checkGameState();
-    }
   }
 
   private scrollToBottom(): void {
