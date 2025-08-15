@@ -122,14 +122,14 @@
         (keydown)="onEnter($event)"
         [placeholder]="i18n.translate('message.placeholder')"
         class="message-input">
-      <button 
-        (click)="toggleRecording()" 
-        class="talk-button"
-        [class.recording]="audioRecordingService.isRecording()"
-        [title]="audioRecordingService.isRecording() ? 'Stop recording' : 'Start recording'">
-        {{ audioRecordingService.isRecording() ? '🔴' : '🎤' }}
-      </button>
-      <button (click)="sendMessage()" class="send-button">{{ i18n.translate('send.button') }}</button>
+        <button (click)="sendMessage()" class="send-button">{{ i18n.translate('send.button') }}</button>
+        <button 
+          (click)="toggleRecording()" 
+          class="talk-button"
+          [class.recording]="audioRecordingService.isRecording()"
+          [title]="audioRecordingService.isRecording() ? 'Stop recording' : 'Start recording'">
+          {{ audioRecordingService.isRecording() ? '🔴' : '🎤' }}
+        </button>
     </div>
 
   </div>
