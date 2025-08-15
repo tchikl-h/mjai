@@ -195,6 +195,35 @@
   margin-left: 3px;
 }
 
+.speak-button {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  margin-left: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.speak-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.speak-button:active {
+  transform: scale(0.95);
+}
+
+.speak-button.small {
+  font-size: 0.8rem;
+  padding: 1px 3px;
+  margin-left: 3px;
+}
+
 .current-indicator {
   color: #28a745;
   font-size: 1.2rem;

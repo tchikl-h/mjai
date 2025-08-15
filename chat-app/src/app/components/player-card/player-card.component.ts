@@ -19,6 +19,7 @@ export class PlayerCardComponent {
   @Input() size: 'small' | 'normal' = 'normal';
   @Output() healthToggle = new EventEmitter<{ player: PlayerImpl, heartIndex: number }>();
   @Output() playerClick = new EventEmitter<PlayerImpl>();
+  @Output() playerSpeak = new EventEmitter<PlayerImpl>();
 
   constructor(
     private traitsService: TraitsService,
@@ -34,6 +35,13 @@ export class PlayerCardComponent {
   onClick(): void {
     if (this.clickable) {
       this.playerClick.emit(this.player);
+    }
+  }
+
+  onSpeakClick(event: Event): void {
+    event.stopPropagation();
+    if (this.player.isAlive()) {
+      this.playerSpeak.emit(this.player);
     }
   }
 

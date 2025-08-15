@@ -31,6 +31,16 @@
           [title]="!player.isAlive() ? i18n.translate('player.eliminated') : !showControls ? '' : (i < player.health ? i18n.translate('health.remove') : i18n.translate('health.add'))">
           {{ i < player.health ? '❤️' : '🤍' }}
         </span>
+        <!-- Speak button -->
+        <button 
+          *ngIf="player.isAlive() && showControls"
+          class="speak-button"
+          [class.small]="size === 'small'"
+          (click)="onSpeakClick($event)"
+          [title]="'Make ' + player.name + ' respond'"
+          type="button">
+          🗣️
+        </button>
         <!-- Trait icon - DEACTIVATED -->
         <!--
         <span 

@@ -121,7 +121,7 @@ export class AppComponent implements OnInit, AfterViewChecked {
       const mjMessage = this.newMessage;
       this.addMJMessage(mjMessage);
       this.newMessage = '';
-      await this.generatePlayerResponse(mjMessage);
+      // Players no longer automatically respond - they respond when their speak button is clicked
     }
   }
 
@@ -190,6 +190,11 @@ export class AppComponent implements OnInit, AfterViewChecked {
     }
   }
 
+  async onPlayerSpeak(player: PlayerImpl): Promise<void> {
+    console.log(`${player.name} speaks...`);
+    await this.generatePlayerResponse('', player);
+  }
+
   toggleHealth(player: PlayerImpl, heartIndex: number): void {
     const previousHealth = player.health;
     
@@ -251,7 +256,7 @@ export class AppComponent implements OnInit, AfterViewChecked {
   private async addGMMessage(text: string): Promise<void> {
     this.addMJMessage(text);
     console.log('Added GM message from voice:', text);
-    await this.generatePlayerResponse(text);
+    // Players no longer automatically respond - they respond when their speak button is clicked
   }
 
   private addMJMessage(text: string): void {
@@ -270,19 +275,33 @@ export class AppComponent implements OnInit, AfterViewChecked {
     );
   }
 
-  private async generatePlayerResponse(mjMessage: string): Promise<void> {
+  private async generatePlayerResponse(mjMessage: string, specificPlayer?: PlayerImpl): Promise<void> {
     try {
-      const currentPlayer = this.gameService.getCurrentTurn().getCurrentPlayer();
-      const playerResponse = await this.apiService.generatePlayerResponse(currentPlayer, mjMessage);
-      this.addPlayerMessage(playerResponse, currentPlayer as PlayerImpl);
-      this.speakCharacterText(currentPlayer as PlayerImpl, playerResponse);
+      const player = specificPlayer || this.gameService.getCurrentTurn().getCurrentPlayer();
+      
+      // Get the latest GM message if no specific message provided
+      const messageToRespond = mjMessage || this.getLatestGMMessage();
+      
+      const playerResponse = await this.apiService.generatePlayerResponse(player, messageToRespond);
+      this.addPlayerMessage(playerResponse, player as PlayerImpl);
+      this.speakCharacterText(player as PlayerImpl, playerResponse);
     } catch (error) {
       console.error('Error generating player response:', error);
-      const currentPlayer = this.gameService.getCurrentTurn().getCurrentPlayer();
+      const player = specificPlayer || this.gameService.getCurrentTurn().getCurrentPlayer();
       const fallbackText = 'I listen carefully to your words.';
-      this.addPlayerMessage(fallbackText, currentPlayer as PlayerImpl);
-      this.speakCharacterText(currentPlayer as PlayerImpl, fallbackText);
+      this.addPlayerMessage(fallbackText, player as PlayerImpl);
+      this.speakCharacterText(player as PlayerImpl, fallbackText);
     }
+  }
+
+  private getLatestGMMessage(): string {
+    // Find the most recent GM message
+    for (let i = this.messages.length - 1; i >= 0; i--) {
+      if (this.messages[i].sender === 'mj') {
+        return this.messages[i].text;
+      }
+    }
+    return 'What shall we do next?'; // Fallback if no GM message found
   }
 
   private addPlayerMessage(text: string, player: PlayerImpl): void {
