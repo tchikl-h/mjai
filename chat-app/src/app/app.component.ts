@@ -17,6 +17,8 @@ import { LanguageSwitcherComponent } from './components/language-switcher/langua
 // import { GameOverScreenComponent } from './components/game-over-screen/game-over-screen.component';
 import { I18nService } from './services/i18n.service';
 import { ElevenTtsComponent } from './components/eleven-tts/eleven-tts.component';
+import { MuteService } from './services/mute.service';
+import { AudioRecordingService } from './services/audio-recording.service';
 
 interface Message {
   text: string;
@@ -55,7 +57,9 @@ export class AppComponent implements OnInit, AfterViewChecked {
     private challengeService: ChallengeService,
     protected gameStateService: GameStateService,
     private chatHistoryService: ChatHistoryService,
-    protected i18n: I18nService
+    protected i18n: I18nService,
+    protected muteService: MuteService,
+    protected audioRecordingService: AudioRecordingService
   ) {}
 
   ngOnInit() {
@@ -270,7 +274,117 @@ export class AppComponent implements OnInit, AfterViewChecked {
     console.log('New turn started with fresh player order');
   }
 
+  toggleMute(): void {
+    this.muteService.toggle();
+  }
+
+  async toggleRecording(): Promise<void> {
+    if (this.audioRecordingService.isRecording()) {
+      // Stop recording and process the audio
+      const audioBlob = await this.audioRecordingService.stopRecording();
+      if (audioBlob && this.ttsComponent) {
+        console.log('Processing recorded audio...');
+        try {
+          const transcribedText = await this.ttsComponent.transcribeAudio(audioBlob);
+          if (transcribedText) {
+            // Add the transcribed message as GM message
+            await this.addGMMessage(transcribedText);
+          } else {
+            console.warn('No text was transcribed from the audio');
+          }
+        } catch (error) {
+          console.error('Error transcribing audio:', error);
+        }
+      }
+    } else {
+      // Start recording
+      const started = await this.audioRecordingService.startRecording();
+      if (!started) {
+        console.error('Failed to start recording');
+      }
+    }
+  }
+
+  private async addGMMessage(text: string): Promise<void> {
+    const gmMessage = {
+      text: text,
+      sender: 'mj' as const,
+      timestamp: new Date()
+    };
+    
+    this.messages.push(gmMessage);
+    
+    // Store in chat history with current turn number
+    this.chatHistoryService.addMessage(
+      text, 
+      'mj', 
+      undefined, 
+      this.getCurrentTurnNumber()
+    );
+    
+    console.log('Added GM message from voice:', text);
+
+    // Generate AI response from the current player
+    try {
+      const currentPlayer = this.gameService.getCurrentTurn().getCurrentPlayer();
+      const playerResponse = await this.apiService.generatePlayerResponse(currentPlayer, text);
+      
+      // Add player response to both display array and history
+      const playerMessageObj = {
+        text: playerResponse,
+        sender: 'player' as const,
+        timestamp: new Date(),
+        player: currentPlayer as PlayerImpl
+      };
+      this.messages.push(playerMessageObj);
+      
+      // Store in chat history with current turn number
+      this.chatHistoryService.addMessage(
+        playerResponse, 
+        'player', 
+        currentPlayer as PlayerImpl, 
+        this.getCurrentTurnNumber()
+      );
+
+      // Trigger TTS for the character's response
+      this.speakCharacterText(currentPlayer as PlayerImpl, playerResponse);
+
+    } catch (error) {
+      console.error('Error generating player response:', error);
+      
+      // Fallback to simple response
+      const currentPlayer = this.gameService.getCurrentTurn().getCurrentPlayer();
+      const fallbackText = 'I listen carefully to your words.';
+      
+      // Add fallback message to both display array and history
+      const fallbackMessageObj = {
+        text: fallbackText,
+        sender: 'player' as const,
+        timestamp: new Date(),
+        player: currentPlayer as PlayerImpl
+      };
+      this.messages.push(fallbackMessageObj);
+      
+      // Store in chat history with current turn number
+      this.chatHistoryService.addMessage(
+        fallbackText, 
+        'player', 
+        currentPlayer as PlayerImpl, 
+        this.getCurrentTurnNumber()
+      );
+
+      // Trigger TTS for fallback response
+      this.speakCharacterText(currentPlayer as PlayerImpl, fallbackText);
+    }
+  }
+
   private speakCharacterText(player: PlayerImpl, text: string): void {
+    // Check if voices are muted
+    if (this.muteService.isMuted()) {
+      console.log('Voices are muted, skipping TTS');
+      return;
+    }
+
     // Check if we have a voice mapping for this character
     if (!this.characterVoices[player.name]) {
       console.warn(`No voice mapping found for character: ${player.name}`);

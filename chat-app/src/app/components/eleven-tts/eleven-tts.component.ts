@@ -246,6 +246,69 @@ export class ElevenTtsComponent {
       use_speaker_boost: this.useSpeakerBoost
     };
   }
+
+  /** Speech-to-text using backend proxy */
+  async transcribeAudio(audioBlob: Blob): Promise<string | null> {
+    this.loading.set(true);
+    this.error.set(null);
+
+    try {
+      console.log('Transcribing audio blob:', {
+        size: audioBlob.size,
+        type: audioBlob.type
+      });
+
+      // Force WAV format for better STT compatibility
+      console.log('Converting audio to WAV format for STT compatibility');
+      
+      // Create file as WAV regardless of original format
+      const processedAudioFile = new File([audioBlob], 'recording.wav', {
+        type: 'audio/wav',
+        lastModified: Date.now()
+      });
+
+      const formData = new FormData();
+      // The backend expects the file as 'audio' field (upload.single('audio'))
+      formData.append('audio', processedAudioFile);
+      
+      // Add optional parameters as form fields (these are read from req.body)
+      formData.append('model_id', 'scribe_v1');
+      // Use null/None for automatic language detection
+      // formData.append('language_code', null); // Don't append if we want automatic detection
+
+      console.log('Sending FormData with:', {
+        audioFile: {
+          name: processedAudioFile.name,
+          size: processedAudioFile.size,
+          type: processedAudioFile.type
+        },
+        model_id: 'scribe_v1'
+      });
+
+      const res = await fetch('http://localhost:3001/api/stt', {
+        method: 'POST',
+        body: formData
+        // Don't set Content-Type header, let the browser set it with boundary for multipart/form-data
+      });
+
+      if (!res.ok) {
+        const msg = await safeReadText(res);
+        console.error('STT API error:', res.status, msg);
+        throw new Error(`STT failed: ${res.status} ${res.statusText} — ${msg}`);
+      }
+
+      const result = await res.json();
+      console.log('STT result:', result);
+      return result.text || null;
+    } catch (err: any) {
+      console.error('Speech-to-text error:', err);
+      this.error.set(err?.message ?? 'Failed to transcribe audio');
+      return null;
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
 }
 
 async function safeReadText(res: Response): Promise<string> {

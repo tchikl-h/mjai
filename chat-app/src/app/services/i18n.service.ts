@@ -56,7 +56,7 @@ interface TranslationKeys {
   providedIn: 'root'
 })
 export class I18nService {
-  private currentLanguage = signal<SupportedLanguage>('en');
+  private currentLanguage = signal<SupportedLanguage>('fr');
   
   // Computed signal that returns the current language
   language = computed(() => this.currentLanguage());

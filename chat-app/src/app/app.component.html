@@ -55,7 +55,15 @@
   <div class="chat-container">
     <div class="chat-header">
       <h1>{{ i18n.translate('app.title') }}</h1>
-      <app-language-switcher></app-language-switcher>
+      <div class="header-controls">
+        <button 
+          class="mute-button" 
+          (click)="toggleMute()"
+          [title]="muteService.isMuted() ? 'Unmute voices' : 'Mute voices'">
+          {{ muteService.isMuted() ? '🔇' : '🔊' }}
+        </button>
+        <app-language-switcher></app-language-switcher>
+      </div>
     </div>
     
     <div class="chat-messages" #chatMessages>
@@ -114,6 +122,13 @@
         (keydown)="onEnter($event)"
         [placeholder]="i18n.translate('message.placeholder')"
         class="message-input">
+      <button 
+        (click)="toggleRecording()" 
+        class="talk-button"
+        [class.recording]="audioRecordingService.isRecording()"
+        [title]="audioRecordingService.isRecording() ? 'Stop recording' : 'Start recording'">
+        {{ audioRecordingService.isRecording() ? '🔴' : '🎤' }}
+      </button>
       <button (click)="sendMessage()" class="send-button">{{ i18n.translate('send.button') }}</button>
     </div>
 
