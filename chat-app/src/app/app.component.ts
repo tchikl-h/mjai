@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
 import { PlayerImpl } from './models/player.model';
 import { GameService } from './services/game.service';
 import { ApiService } from './services/api.service';
@@ -28,7 +29,7 @@ interface Message {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule, DiceComponent, PlayerCardComponent, LanguageSwitcherComponent, PlayerModalComponent, ElevenTtsComponent],
+  imports: [CommonModule, FormsModule, MatIconModule, DiceComponent, PlayerCardComponent, LanguageSwitcherComponent, PlayerModalComponent, ElevenTtsComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })

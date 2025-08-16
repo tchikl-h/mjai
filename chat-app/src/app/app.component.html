@@ -48,7 +48,7 @@
           class="mute-button" 
           (click)="toggleMute()"
           [title]="muteService.isMuted() ? 'Unmute voices' : 'Mute voices'">
-          {{ muteService.isMuted() ? '🔇' : '🔊' }}
+          <mat-icon>{{ muteService.isMuted() ? 'volume_off' : 'volume_up' }}</mat-icon>
         </button>
         <app-language-switcher></app-language-switcher>
       </div>
@@ -123,7 +123,7 @@
           class="talk-button"
           [class.recording]="audioRecordingService.isRecording()"
           [title]="audioRecordingService.isRecording() ? 'Stop recording' : 'Start recording'">
-          {{ audioRecordingService.isRecording() ? '🔴' : '🎤' }}
+          <mat-icon>{{ audioRecordingService.isRecording() ? 'stop' : 'mic' }}</mat-icon>
         </button>
     </div>
 
