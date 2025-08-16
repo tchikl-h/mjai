@@ -7,6 +7,7 @@ import { API_CONFIG } from '../config/api.config';
 import { PromptBuilderService } from './prompt-builder.service';
 import { LoggerService } from './logger.service';
 import { ChatHistoryService } from './chat-history.service';
+import { GameService } from './game.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,59 +17,32 @@ export class ApiService {
   constructor(
     private promptBuilder: PromptBuilderService,
     private logger: LoggerService,
-    private chatHistory: ChatHistoryService
+    private chatHistory: ChatHistoryService,
+    private gameService: GameService
   ) {}
-
-  async generatePlayerResponse(
-    player: PlayerImpl, 
-    mjMessage: string, 
-    options: ApiRequestOptions = {}
-  ): Promise<string> {
-    const startTime = Date.now();
-    
-    try {
-      const request = this.buildChatRequest(player, mjMessage);
-      
-      // Log the full prompt details for debugging
-      console.log(`🤖 Player Response Request for ${player.name}:`);
-      console.log(`📝 Player Description: ${request.playerDescription}`);
-      console.log(`💬 GM Message: ${request.mjMessage}`);
-      console.log(`🕰️ Context: ${request.context || 'No context provided'}`);
-      console.log('📦 Full Request:', request);
-      
-      this.logger.logApiRequest(request);
-
-      const response = await this.makeChatRequest(request, options);
-      
-      const duration = Date.now() - startTime;
-      this.logger.logApiResponse(response, duration);
-
-      return this.extractResponseText(response, player);
-
-    } catch (error) {
-      const apiError = this.handleApiError(error);
-      this.logger.logApiError(apiError);
-      
-      return this.promptBuilder.getRandomFallbackResponse(player.name);
-    }
-  }
 
   generatePlayerResponseStream(
     player: PlayerImpl, 
-    mjMessage: string, 
     options: ApiRequestOptions = {}
   ): Observable<{ sentence: string; isComplete: boolean; fullResponse?: string }> {
     const subject = new Subject<{ sentence: string; isComplete: boolean; fullResponse?: string }>();
     
     const startTime = Date.now();
     
-    const request = this.buildChatRequest(player, mjMessage);
+    const request = this.buildChatRequest(player);
     
     // Log the request
     console.log(`🤖 Streaming Player Response Request for ${player.name}:`);
     console.log(`📝 Player Description: ${request.playerDescription}`);
-    console.log(`💬 GM Message: ${request.mjMessage}`);
-    console.log(`🕰️ Context: ${request.context || 'No context provided'}`);
+    console.log(`💬 Messages: ${request.messages?.length || 0} messages provided`);
+    if (request.messages && request.messages.length > 0) {
+      console.log(`📊 Messages summary:`, {
+        totalMessages: request.messages.length,
+        systemMessages: request.messages.filter(m => m.role === 'system').length,
+        userMessages: request.messages.filter(m => m.role === 'user').length,
+        assistantMessages: request.messages.filter(m => m.role === 'assistant').length
+      });
+    }
     
     this.logger.logApiRequest(request);
 
@@ -77,133 +51,37 @@ export class ApiService {
     return subject.asObservable();
   }
 
-  private buildChatRequest(player: PlayerImpl, mjMessage: string, includeContext: boolean = true): ChatRequest {
+  private buildChatRequest(player: PlayerImpl, includeMessages: boolean = true): ChatRequest {
+    const allPlayers = this.gameService.getAllPlayers() as PlayerImpl[];
     const request: ChatRequest = {
       playerName: player.name,
-      playerDescription: this.promptBuilder.buildFullPlayerDescription(player, true),
-      mjMessage: this.promptBuilder.buildMessagePrompt(mjMessage)
+      playerDescription: this.promptBuilder.buildFullPlayerDescription(player, true, allPlayers)
     };
 
-    // Add conversation context for better AI responses
-    if (includeContext) {
+    // Add conversation messages for better AI responses
+    if (includeMessages) {
       try {
-        // Use compact context to manage prompt length
-        const context = this.chatHistory.getContext(player);
+        // Get the latest 20 messages in AI SDK format
+        const messages = this.chatHistory.getMessages(20);
         
-        if (context && context !== "This is the start of our adventure.") {
-          request.context = `Recent conversation:\n${context}`;
+        if (messages && messages.length > 0) {
+          request.messages = messages;
         }
         
-        this.logger.info(`Context generated for ${player.name}`, {
-          contextLength: request.context?.length || 0,
+        this.logger.info(`Messages generated for ${player.name}`, {
+          messageCount: messages?.length || 0,
+          totalLength: messages?.reduce((sum, msg) => sum + msg.content.length, 0) || 0,
           messageHistory: this.chatHistory.getCurrentSession().totalMessages
         });
       } catch (error) {
-        this.logger.warn('Failed to generate context for API request', error);
-        // Continue without context rather than fail the request
+        this.logger.warn('Failed to generate messages for API request', error);
+        // Continue without messages rather than fail the request
       }
     }
 
     return request;
   }
-
-  private async makeChatRequest(
-    request: ChatRequest, 
-    options: ApiRequestOptions
-  ): Promise<ChatResponse> {
-    const timeoutMs = options.timeout || API_CONFIG.TIMEOUTS.CHAT;
-    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CHAT}`;
-
-    return new Promise((resolve, reject) => {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => {
-        controller.abort();
-        reject(new Error('Request timeout'));
-      }, timeoutMs);
-
-      fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(request),
-        signal: controller.signal
-      })
-      .then(response => {
-        clearTimeout(timeoutId);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        if (!response.body) {
-          throw new Error('No response body');
-        }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let fullResponse = '';
-
-        const readStream = async (): Promise<void> => {
-          try {
-            const { done, value } = await reader.read();
-            
-            if (done) {
-              // Stream completed, resolve with the full response
-              resolve({ response: fullResponse });
-              return;
-            }
-
-            // Decode the chunk
-            const chunk = decoder.decode(value, { stream: true });
-            
-            // Parse SSE format - look for data: lines
-            const lines = chunk.split('\n');
-            for (const line of lines) {
-              if (line.startsWith('data: ')) {
-                const data = line.slice(6); // Remove 'data: ' prefix
-                if (data === '[DONE]') {
-                  // Stream end marker
-                  resolve({ response: fullResponse });
-                  return;
-                }
-                
-                try {
-                  const parsed = JSON.parse(data);
-                  // Concatenate the token to build the full response
-                  if (parsed.token) {
-                    fullResponse += parsed.token;
-                  } else if (parsed.delta?.content) {
-                    fullResponse += parsed.delta.content;
-                  } else if (parsed.choices?.[0]?.delta?.content) {
-                    fullResponse += parsed.choices[0].delta.content;
-                  }
-                } catch (parseError) {
-                  // If it's not JSON, it might be plain text token
-                  if (data.trim() && data !== '') {
-                    fullResponse += data;
-                  }
-                }
-              }
-            }
-
-            // Continue reading
-            return readStream();
-          } catch (error) {
-            reader.releaseLock();
-            reject(error);
-          }
-        };
-
-        return readStream();
-      })
-      .catch(error => {
-        clearTimeout(timeoutId);
-        reject(error);
-      });
-    });
-  }
-
+  
   private async makeStreamingChatRequest(
     request: ChatRequest,
     options: ApiRequestOptions,

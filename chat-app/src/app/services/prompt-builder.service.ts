@@ -76,13 +76,6 @@ export class PromptBuilderService {
     return player.description;
   }
 
-  buildMessagePrompt(mjMessage: string): string {
-    const lang = this.i18n.language();
-    if (lang === 'fr') {
-      return `${mjMessage.trim()}. Que fais-tu ?`;
-    }
-    return `${mjMessage.trim()}. What do you do?`;
-  }
 
   getRandomFallbackResponse(playerName: string): string {
     const lang = this.i18n.language();
@@ -110,12 +103,20 @@ export class PromptBuilderService {
     }
   }
 
-  buildFullPlayerDescription(player: PlayerImpl, includeHealth: boolean = false): string {
+  buildFullPlayerDescription(player: PlayerImpl, includeHealth: boolean = false, allPlayers?: PlayerImpl[]): string {
     const lang = this.i18n.language();
     let description = this.buildPlayerPrompt(player);
     
     if (includeHealth) {
       description += this.formatHealthContext(player);
+    }
+
+    // Add companions section
+    if (allPlayers && allPlayers.length > 1) {
+      const companions = allPlayers.filter(p => p.name !== player.name);
+      if (companions.length > 0) {
+        description += this.buildCompanionsSection(companions);
+      }
     }
 
     // Challenge system - DEACTIVATED
@@ -131,5 +132,56 @@ export class PromptBuilderService {
     */
 
     return description;
+  }
+
+  private buildCompanionsSection(companions: PlayerImpl[]): string {
+    const lang = this.i18n.language();
+    
+    if (companions.length === 0) {
+      return '';
+    }
+
+    let companionsText = '';
+    
+    if (lang === 'fr') {
+      companionsText = '\n\nTes compagnons d\'aventure : ';
+    } else {
+      companionsText = '\n\nYour adventure companions: ';
+    }
+
+    const companionDescriptions = companions.map(companion => {
+      const baseDescription = this.getLocalizedPlayerDescription(companion);
+      let companionInfo = '';
+      
+      if (lang === 'fr') {
+        companionInfo = `${companion.name} - ${baseDescription}`;
+        
+        // Add health status
+        if (companion.health <= 0) {
+          companionInfo += ' (inconscient)';
+        } else if (companion.health <= 1) {
+          companionInfo += ' (gravement blessé)';
+        } else if (companion.health <= 2) {
+          companionInfo += ' (blessé)';
+        }
+      } else {
+        companionInfo = `${companion.name} - ${baseDescription}`;
+        
+        // Add health status
+        if (companion.health <= 0) {
+          companionInfo += ' (unconscious)';
+        } else if (companion.health <= 1) {
+          companionInfo += ' (badly wounded)';
+        } else if (companion.health <= 2) {
+          companionInfo += ' (injured)';
+        }
+      }
+      
+      return companionInfo;
+    });
+
+    companionsText += companionDescriptions.join('; ') + '.';
+    
+    return companionsText;
   }
 }

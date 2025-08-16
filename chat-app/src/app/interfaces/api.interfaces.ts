@@ -1,8 +1,8 @@
 export interface ChatRequest {
   playerName: string;
   playerDescription: string;
-  mjMessage: string;
-  context?: string; // Conversation context for better AI responses
+  context?: string; // Deprecated - use messages instead
+  messages?: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
 }
 
 export interface ChatResponse {

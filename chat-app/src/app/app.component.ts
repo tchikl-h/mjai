@@ -101,6 +101,9 @@ export class AppComponent implements OnInit, AfterViewChecked {
         const player = this.gameService.getAllPlayers().find(p => p.name === playerName) as PlayerImpl;
         if (!player) return `Player "${playerName}" not found`;
         return this.chatHistoryService.getCurrentTurnContext(player, this.getCurrentTurnNumber());
+      },
+      getMessages: (messageCount?: number) => {
+        return this.chatHistoryService.getMessages(messageCount);
       }
     };
     
@@ -109,6 +112,7 @@ export class AppComponent implements OnInit, AfterViewChecked {
     console.log('🔍 Search: chatHistory.search("text"), chatHistory.getPlayerMessages("Warrior")');
     console.log('🎯 Context: chatHistory.getContext("Warrior"), chatHistory.getCompactContext("Mage")');
     console.log('⚡ Current Turn: chatHistory.getCurrentTurnContext("Rogue")');
+    console.log('🤖 AI SDK: chatHistory.getMessages(20)');
   }
 
   async sendMessage() {
@@ -274,9 +278,6 @@ export class AppComponent implements OnInit, AfterViewChecked {
     try {
       const player = specificPlayer || this.gameService.getCurrentTurn().getCurrentPlayer();
       
-      // Get the latest GM message if no specific message provided
-      const messageToRespond = mjMessage || this.getLatestGMMessage();
-      
       // Create a streaming message placeholder
       const streamingId = `streaming-${Date.now()}-${Math.random()}`;
       const streamingMessage: Message = {
@@ -292,7 +293,7 @@ export class AppComponent implements OnInit, AfterViewChecked {
       let fullResponse = '';
       
       // Subscribe to the streaming response
-      this.apiService.generatePlayerResponseStream(player, messageToRespond).subscribe({
+      this.apiService.generatePlayerResponseStream(player).subscribe({
         next: (data) => {
           if (data.isComplete) {
             // Stream is complete, finalize the message
@@ -346,15 +347,6 @@ export class AppComponent implements OnInit, AfterViewChecked {
     }
   }
 
-  private getLatestGMMessage(): string {
-    // Find the most recent GM message
-    for (let i = this.messages.length - 1; i >= 0; i--) {
-      if (this.messages[i].sender === 'mj') {
-        return this.messages[i].text;
-      }
-    }
-    return 'What shall we do next?'; // Fallback if no GM message found
-  }
 
   private addPlayerMessage(text: string, player: PlayerImpl): void {
     const playerMessage = {

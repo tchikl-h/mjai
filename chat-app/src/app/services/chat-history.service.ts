@@ -455,4 +455,59 @@ export class ChatHistoryService {
     
     return contextParts.join('\n');
   }
+
+  /**
+   * Get messages in AI SDK format for streamText function
+   * Converts chat history to the format expected by AI SDK: { role: 'user' | 'assistant', content: string }[]
+   * @param messageCount Number of recent messages to include (default: 20)
+   * @returns Array of messages in AI SDK format
+   */
+  getMessages(messageCount: number = 20): Array<{ role: 'user' | 'assistant'; content: string }> {
+    const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [];
+    const lang = this.i18n.language();
+    
+    // Get recent messages from chat history
+    const recentMessages = this.getLastNMessages(messageCount);
+    
+    // Convert chat messages to AI SDK format
+    recentMessages.forEach(message => {
+      if (message.sender === 'mj') {
+        // GM messages are treated as user messages (driving the conversation)
+        const gmPrefix = lang === 'fr' ? 'Le MJ a dit' : 'The GM said';
+        messages.push({
+          role: 'user',
+          content: `${gmPrefix}: ${message.text}`
+        });
+      } else if (message.sender === 'player') {
+        // Player messages are treated as assistant messages (AI responses)
+        let playerIdentifier = '';
+        if (message.playerName) {
+          if (lang === 'fr') {
+            playerIdentifier = `Ton coéquipier ${message.playerName} a répondu`;
+          } else {
+            playerIdentifier = `Your teammate ${message.playerName} responded`;
+          }
+        } else {
+          if (lang === 'fr') {
+            playerIdentifier = 'Ton coéquipier a répondu';
+          } else {
+            playerIdentifier = 'Your teammate responded';
+          }
+        }
+        messages.push({
+          role: 'assistant',
+          content: `${playerIdentifier}: ${message.text}`
+        });
+      }
+    });
+    
+    // Log for debugging
+    console.log(`Chat History: Generated ${messages.length} messages for AI SDK`, {
+      chatMessages: recentMessages.length,
+      totalLength: messages.reduce((sum, msg) => sum + msg.content.length, 0),
+      language: lang
+    });
+    
+    return messages;
+  }
 }

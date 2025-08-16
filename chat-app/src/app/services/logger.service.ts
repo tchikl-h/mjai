@@ -55,7 +55,7 @@ export class LoggerService {
   logApiRequest(request: ChatRequest): void {
     this.debug('Making API request', {
       playerName: request.playerName,
-      messagePreview: request.mjMessage.substring(0, 50) + '...',
+      messagePreview: request.context?.substring(0, 50) + '...',
       timestamp: new Date().toISOString()
     });
   }
