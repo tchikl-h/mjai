@@ -12,22 +12,26 @@ export interface Trait {
 
 export interface Player {
   name: string;
-  description: string;
+  backstory: string;
   imageUri: string;
   health: number;
-  inventory: Item[];
-  trait: Trait;
+  inventory: string;
+  traits: string;
+  attacks: string;
+  voiceId: string;
   isAlive(): boolean;
 }
 
 export class PlayerImpl implements Player {
   constructor(
     public name: string,
-    public description: string,
+    public backstory: string,
     public imageUri: string,
-    public trait: Trait,
+    public traits: string,
     public health: number = 3,
-    public inventory: Item[] = []
+    public inventory: string = '',
+    public attacks: string = '',
+    public voiceId: string = ''
   ) {}
 
   isAlive(): boolean {

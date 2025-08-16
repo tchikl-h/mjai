@@ -1,7 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PlayerImpl } from '../../models/player.model';
-import { TraitsService } from '../../services/traits.service';
 import { I18nService } from '../../services/i18n.service';
 
 @Component({
@@ -22,7 +21,6 @@ export class PlayerCardComponent {
   @Output() playerSpeak = new EventEmitter<PlayerImpl>();
 
   constructor(
-    private traitsService: TraitsService,
     protected i18n: I18nService
   ) {}
 
@@ -44,17 +42,4 @@ export class PlayerCardComponent {
       this.playerSpeak.emit(this.player);
     }
   }
-
-  // Trait methods - DEACTIVATED
-  /*
-  getTraitIcon(): string {
-    return this.traitsService.getTraitIcon(this.player.trait.name);
-  }
-
-  getTraitTooltip(): string {
-    const name = this.traitsService.getLocalizedTraitName(this.player.trait);
-    const description = this.traitsService.getLocalizedTraitDescription(this.player.trait);
-    return `${name}: ${description}`;
-  }
-  */
 }

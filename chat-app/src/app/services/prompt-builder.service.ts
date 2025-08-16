@@ -36,26 +36,10 @@ export class PromptBuilderService {
 
   buildPlayerPrompt(player: PlayerImpl): string {
     const lang = this.i18n.language();
-    // Trait section - DEACTIVATED
-    // const traitSection = this.buildTraitSection(player);
     const descriptionSection = this.buildDescriptionSection(player);
     
     return `${PROMPT_CONFIG.BASE_PREPROMPT[lang]} ${descriptionSection}`.trim();
   }
-
-  // DEACTIVATED - Trait system
-  /*
-  private buildTraitSection(player: PlayerImpl): string {
-    const lang = this.i18n.language();
-    const traitName = player.trait.name[lang];
-    const traitDescription = player.trait.description[lang];
-    
-    if (lang === 'fr') {
-      return `Ton trait principal est ${traitName}, ce qui signifie : ${traitDescription}.`;
-    }
-    return `Your main trait is ${traitName}, which means: ${traitDescription}.`;
-  }
-  */
 
   private buildDescriptionSection(player: PlayerImpl): string {
     const lang = this.i18n.language();
@@ -68,12 +52,11 @@ export class PromptBuilderService {
   }
 
   private getLocalizedPlayerDescription(player: PlayerImpl): string {
-    const lang = this.i18n.language();
-    const descriptions = PLAYER_DESCRIPTIONS[player.name as PlayerName];
-    if (descriptions && (lang === 'en' || lang === 'fr')) {
-      return descriptions[lang];
+    const description = PLAYER_DESCRIPTIONS[player.name as PlayerName];
+    if (description) {
+      return description;
     }
-    return player.description;
+    return player.backstory;
   }
 
 
@@ -107,6 +90,33 @@ export class PromptBuilderService {
     const lang = this.i18n.language();
     let description = this.buildPlayerPrompt(player);
     
+    // Add personality traits section
+    if (player.traits && player.traits.trim()) {
+      if (lang === 'fr') {
+        description += `\n\nVoici tes traits de personnalité : ${player.traits}`;
+      } else {
+        description += `\n\nHere are your personality traits: ${player.traits}`;
+      }
+    }
+
+    // Add inventory section
+    if (player.inventory && player.inventory.trim()) {
+      if (lang === 'fr') {
+        description += `\n\nVoici les objets que tu as dans ton inventaire : ${player.inventory}`;
+      } else {
+        description += `\n\nHere are the items you have in your inventory: ${player.inventory}`;
+      }
+    }
+
+    // Add attacks section
+    if (player.attacks && player.attacks.trim()) {
+      if (lang === 'fr') {
+        description += `\n\nVoici tes attaques enregistrées : ${player.attacks}`;
+      } else {
+        description += `\n\nHere are your registered attacks: ${player.attacks}`;
+      }
+    }
+    
     if (includeHealth) {
       description += this.formatHealthContext(player);
     }
@@ -118,7 +128,6 @@ export class PromptBuilderService {
         description += this.buildCompanionsSection(companions);
       }
     }
-
 
     return description;
   }

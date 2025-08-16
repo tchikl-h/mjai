@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { PlayerImpl } from './models/player.model';
 import { GameService } from './services/game.service';
 import { ApiService } from './services/api.service';
-import { TraitsService } from './services/traits.service';
 import { ChatHistoryService } from './services/chat-history.service';
 import { DiceComponent } from './dice/dice.component';
 import { PlayerCardComponent } from './components/player-card/player-card.component';
@@ -13,7 +12,7 @@ import { I18nService } from './services/i18n.service';
 import { ElevenTtsComponent } from './components/eleven-tts/eleven-tts.component';
 import { MuteService } from './services/mute.service';
 import { AudioRecordingService } from './services/audio-recording.service';
-import { PLAYER_CONFIGS, CHARACTER_VOICES } from './config/players.config';
+import { PLAYERS, PLAYER_CONFIGS, CHARACTER_VOICES } from './config/players.config';
 
 interface Message {
   text: string;
@@ -45,7 +44,6 @@ export class AppComponent implements OnInit, AfterViewChecked {
   constructor(
     protected gameService: GameService, 
     private apiService: ApiService,
-    private traitsService: TraitsService,
     private chatHistoryService: ChatHistoryService,
     protected i18n: I18nService,
     protected muteService: MuteService,
@@ -58,13 +56,8 @@ export class AppComponent implements OnInit, AfterViewChecked {
   }
 
   private initializePlayers(): void {
-    const dummyTrait = {
-      name: { en: 'None', fr: 'Aucun' },
-      description: { en: 'No trait', fr: 'Aucun trait' }
-    };
-
-    const players = PLAYER_CONFIGS.map(config => 
-      new PlayerImpl(config.name, config.description, config.imagePath, dummyTrait)
+    const players = Object.values(PLAYERS).map(config => 
+      new PlayerImpl(config.name, config.backstory, config.imageUri, config.traits, config.health, config.inventory, config.attacks, config.voiceId)
     );
     this.gameService.setPlayers(players);
   }
@@ -365,9 +358,9 @@ export class AppComponent implements OnInit, AfterViewChecked {
       return;
     }
 
-    // Check if we have a voice mapping for this character
-    if (!this.characterVoices[player.name]) {
-      console.warn(`No voice mapping found for character: ${player.name}`);
+    // Check if player has a voice ID
+    if (!player.voiceId) {
+      console.warn(`No voice ID found for character: ${player.name}`);
       return;
     }
 
@@ -387,7 +380,7 @@ export class AppComponent implements OnInit, AfterViewChecked {
     setTimeout(async () => {
       if (this.ttsComponent) {
         console.log(`Speaking as ${player.name}: ${cleanText}`);
-        const voiceId = this.characterVoices[player.name];
+        const voiceId = player.voiceId;
         const success = await this.ttsComponent.speakAs(player.name, cleanText, voiceId);
         if (!success) {
           console.warn(`Failed to generate speech for ${player.name}`);
