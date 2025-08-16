@@ -61,8 +61,8 @@ export class ApiService {
     // Add conversation messages for better AI responses
     if (includeMessages) {
       try {
-        // Get the latest 20 messages in AI SDK format
-        const messages = this.chatHistory.getMessages(20);
+        // Get the latest 20 messages in AI SDK format, personalized for the current player
+        const messages = this.chatHistory.getMessages(20, player);
         
         if (messages && messages.length > 0) {
           request.messages = messages;

@@ -460,9 +460,10 @@ export class ChatHistoryService {
    * Get messages in AI SDK format for streamText function
    * Converts chat history to the format expected by AI SDK: { role: 'user' | 'assistant', content: string }[]
    * @param messageCount Number of recent messages to include (default: 20)
+   * @param currentPlayer Optional current player to personalize message roles
    * @returns Array of messages in AI SDK format
    */
-  getMessages(messageCount: number = 20): Array<{ role: 'user' | 'assistant'; content: string }> {
+  getMessages(messageCount: number = 20, currentPlayer?: PlayerImpl): Array<{ role: 'user' | 'assistant'; content: string }> {
     const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [];
     const lang = this.i18n.language();
     
@@ -479,23 +480,38 @@ export class ChatHistoryService {
           content: `${gmPrefix}: ${message.text}`
         });
       } else if (message.sender === 'player') {
-        // Player messages are treated as assistant messages (AI responses)
+        // Determine role and identifier based on whether this is the current player
         let playerIdentifier = '';
-        if (message.playerName) {
+        let role: 'user' | 'assistant' = 'assistant';
+        
+        if (currentPlayer && message.playerName === currentPlayer.name) {
+          // This is the current player's own message
+          role = 'assistant';
           if (lang === 'fr') {
-            playerIdentifier = `Ton coéquipier ${message.playerName} a répondu`;
+            playerIdentifier = 'Tu as répondu';
           } else {
-            playerIdentifier = `Your teammate ${message.playerName} responded`;
+            playerIdentifier = 'You responded';
           }
         } else {
-          if (lang === 'fr') {
-            playerIdentifier = 'Ton coéquipier a répondu';
+          // This is a teammate's message
+          role = 'user'; // Teammates' messages are treated as user input for context
+          if (message.playerName) {
+            if (lang === 'fr') {
+              playerIdentifier = `Ton coéquipier ${message.playerName} a dit`;
+            } else {
+              playerIdentifier = `Your teammate ${message.playerName} said`;
+            }
           } else {
-            playerIdentifier = 'Your teammate responded';
+            if (lang === 'fr') {
+              playerIdentifier = 'Ton coéquipier a dit';
+            } else {
+              playerIdentifier = 'Your teammate said';
+            }
           }
         }
+        
         messages.push({
-          role: 'assistant',
+          role,
           content: `${playerIdentifier}: ${message.text}`
         });
       }
@@ -505,7 +521,8 @@ export class ChatHistoryService {
     console.log(`Chat History: Generated ${messages.length} messages for AI SDK`, {
       chatMessages: recentMessages.length,
       totalLength: messages.reduce((sum, msg) => sum + msg.content.length, 0),
-      language: lang
+      language: lang,
+      currentPlayer: currentPlayer?.name || 'none provided'
     });
     
     return messages;

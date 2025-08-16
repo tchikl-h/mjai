@@ -102,8 +102,9 @@ export class AppComponent implements OnInit, AfterViewChecked {
         if (!player) return `Player "${playerName}" not found`;
         return this.chatHistoryService.getCurrentTurnContext(player, this.getCurrentTurnNumber());
       },
-      getMessages: (messageCount?: number) => {
-        return this.chatHistoryService.getMessages(messageCount);
+      getMessages: (messageCount?: number, playerName?: string) => {
+        const player = playerName ? this.gameService.getAllPlayers().find(p => p.name === playerName) as PlayerImpl : undefined;
+        return this.chatHistoryService.getMessages(messageCount, player);
       }
     };
     
@@ -112,7 +113,7 @@ export class AppComponent implements OnInit, AfterViewChecked {
     console.log('🔍 Search: chatHistory.search("text"), chatHistory.getPlayerMessages("Warrior")');
     console.log('🎯 Context: chatHistory.getContext("Warrior"), chatHistory.getCompactContext("Mage")');
     console.log('⚡ Current Turn: chatHistory.getCurrentTurnContext("Rogue")');
-    console.log('🤖 AI SDK: chatHistory.getMessages(20)');
+    console.log('🤖 AI SDK: chatHistory.getMessages(20, "Warrior")');
   }
 
   async sendMessage() {
