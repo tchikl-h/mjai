@@ -1,12 +1,13 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 import { PlayerImpl } from '../../models/player.model';
 import { I18nService } from '../../services/i18n.service';
 
 @Component({
   selector: 'app-player-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatIconModule],
   templateUrl: './player-card.component.html',
   styleUrls: ['./player-card.component.css']
 })

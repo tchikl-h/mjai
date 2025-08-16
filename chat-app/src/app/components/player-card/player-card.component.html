@@ -9,6 +9,24 @@
      [style.cursor]="clickable ? 'pointer' : 'default'"
      [title]="clickable ? 'Click to make ' + player.name + ' the active player' : ''">
   
+  <!-- Edit and Delete buttons in top right corner -->
+  <div class="card-actions" *ngIf="showControls && size !== 'small'">
+    <button 
+      class="edit-button"
+      (click)="onEditClick($event)"
+      [title]="'Edit ' + player.name"
+      type="button">
+      <mat-icon>edit</mat-icon>
+    </button>
+    <button 
+      class="delete-button"
+      (click)="onDeleteClick($event)"
+      [title]="'Delete ' + player.name"
+      type="button">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </div>
+
   <div class="player-info">
     <div class="avatar-container">
       <img [src]="player.imageUri" [alt]="player.name" class="player-avatar">
@@ -41,24 +59,6 @@
           type="button">
           🗣️
         </button>
-        <!-- Edit button -->
-        <button 
-          *ngIf="showControls && size !== 'small'"
-          class="edit-button"
-          (click)="onEditClick($event)"
-          [title]="'Edit ' + player.name"
-          type="button">
-          ✏️
-        </button>
-        <!-- Delete button -->
-        <button 
-          *ngIf="showControls && size !== 'small'"
-          class="delete-button"
-          (click)="onDeleteClick($event)"
-          [title]="'Delete ' + player.name"
-          type="button">
-          🗑️
-        </button>
         <!-- Trait icon - DEACTIVATED -->
         <!--
         <span 
@@ -72,6 +72,5 @@
     </div>
   </div>
   
-  <div *ngIf="isCurrentPlayer && size !== 'small'" class="current-indicator">▶</div>
   <div *ngIf="!player.isAlive()" class="eliminated-status">{{ i18n.translate('eliminated') }}</div>
 </div>
