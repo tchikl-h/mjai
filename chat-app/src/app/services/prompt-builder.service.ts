@@ -119,17 +119,6 @@ export class PromptBuilderService {
       }
     }
 
-    // Challenge system - DEACTIVATED
-    /*
-    if (player.trait.challenge && !player.challengeResolved) {
-      const challenge = player.trait.challenge[lang];
-      if (lang === 'fr') {
-        description += ` Rappelle-toi, tu fais actuellement face à ce défi : ${challenge}`;
-      } else {
-        description += ` Remember, you currently face this challenge: ${challenge}`;
-      }
-    }
-    */
 
     return description;
   }

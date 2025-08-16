@@ -1,24 +1,3 @@
-<!-- Win Screen Overlay - DEACTIVATED -->
-<!--
-<app-win-screen
-  *ngIf="gameStateService.status() === 'won'"
-  [players]="gameService.getAllPlayers()"
-  [endReason]="gameStateService.endReason()!"
-  [finalTurn]="getCurrentTurnNumber()"
-  (restart)="onRestart()">
-</app-win-screen>
--->
-
-<!-- Game Over Screen Overlay - DEACTIVATED -->
-<!--
-<app-game-over-screen
-  *ngIf="gameStateService.status() === 'lost_all_dead' || gameStateService.status() === 'lost_too_many_turns'"
-  [players]="gameService.getAllPlayers()"
-  [endReason]="gameStateService.endReason()!"
-  [finalTurn]="getCurrentTurnNumber()"
-  (restart)="onRestart()">
-</app-game-over-screen>
--->
 
 <div class="app-container">
   <!-- Left Sidebar - Turn Order -->
@@ -151,8 +130,6 @@
       <app-dice></app-dice>
     </div>
     
-    <!-- Challenges List - DEACTIVATED -->
-    <!-- <app-challenges-list [players]="gameService.getAllPlayers()"></app-challenges-list> -->
   </div>
 
   <!-- Hidden TTS Component for Character Speech -->

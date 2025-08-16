@@ -8,7 +8,6 @@ export interface LocalizedText {
 export interface Trait {
   name: LocalizedText;
   description: LocalizedText;
-  challenge: LocalizedText;
 }
 
 export interface Player {
@@ -18,7 +17,6 @@ export interface Player {
   health: number;
   inventory: Item[];
   trait: Trait;
-  challengeResolved: boolean;
   isAlive(): boolean;
 }
 
@@ -29,8 +27,7 @@ export class PlayerImpl implements Player {
     public imageUri: string,
     public trait: Trait,
     public health: number = 3,
-    public inventory: Item[] = [],
-    public challengeResolved: boolean = false
+    public inventory: Item[] = []
   ) {}
 
   isAlive(): boolean {

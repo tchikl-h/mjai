@@ -467,11 +467,6 @@
   padding: 1rem;
 }
 
-.dice-section.top-right app-challenges-list {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-}
 
 
 /* Responsive Design */

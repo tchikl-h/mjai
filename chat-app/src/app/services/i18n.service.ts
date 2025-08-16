@@ -8,7 +8,6 @@ interface TranslationKeys {
   'turn.order': string;
   'turn.number': string;
   'dice.roller': string;
-  'player.challenges': string;
   'game.master': string;
   'message.placeholder': string;
   'send.button': string;
@@ -18,8 +17,6 @@ interface TranslationKeys {
   // Player Actions
   'health.remove': string;
   'health.add': string;
-  'challenge.resolve': string;
-  'challenge.unresolved': string;
   'player.eliminated': string;
   
   // Game Messages
@@ -41,8 +38,6 @@ interface TranslationKeys {
   'fallback.alert': string;
 
   // Game End Messages
-  'game.won.all.challenges': string;
-  'game.won.challenges.details': string;
   'game.over.all.dead': string;
   'game.over.all.dead.details': string;
   'game.over.too.many.turns': string;
@@ -68,7 +63,6 @@ export class I18nService {
       'turn.order': 'Turn Order',
       'turn.number': 'Turn',
       'dice.roller': 'Dice Roller',
-      'player.challenges': 'Player Challenges',
       'game.master': 'Game Master',
       'message.placeholder': 'Type your message...',
       'send.button': 'Send',
@@ -78,8 +72,6 @@ export class I18nService {
       // Player Actions
       'health.remove': 'Click to remove health',
       'health.add': 'Click to add health',
-      'challenge.resolve': 'Mark as resolved',
-      'challenge.unresolved': 'Mark as unresolved',
       'player.eliminated': 'Player is eliminated',
       
       // Game Messages
@@ -101,8 +93,6 @@ export class I18nService {
       'fallback.alert': 'remains alert and ready',
 
       // Game End Messages
-      'game.won.all.challenges': 'Victory! All Challenges Completed!',
-      'game.won.challenges.details': '{{playerCount}} players completed all challenges in {{turnNumber}} turns!',
       'game.over.all.dead': 'Game Over - All Players Eliminated',
       'game.over.all.dead.details': 'All party members have fallen in battle.',
       'game.over.too.many.turns': 'Game Over - Time Limit Exceeded',
@@ -117,7 +107,6 @@ export class I18nService {
       'turn.order': 'Ordre des Tours',
       'turn.number': 'Tour',
       'dice.roller': 'Lanceur de Dés',
-      'player.challenges': 'Défis des Joueurs',
       'game.master': 'Maître du Jeu',
       'message.placeholder': 'Tapez votre message...',
       'send.button': 'Envoyer',
@@ -127,8 +116,6 @@ export class I18nService {
       // Player Actions
       'health.remove': 'Cliquez pour retirer de la santé',
       'health.add': 'Cliquez pour ajouter de la santé',
-      'challenge.resolve': 'Marquer comme résolu',
-      'challenge.unresolved': 'Marquer comme non résolu',
       'player.eliminated': 'Le joueur est éliminé',
       
       // Game Messages
@@ -150,8 +137,6 @@ export class I18nService {
       'fallback.alert': 'reste vigilant et prêt',
 
       // Game End Messages
-      'game.won.all.challenges': 'Victoire ! Tous les Défis Accomplis !',
-      'game.won.challenges.details': '{{playerCount}} joueurs ont accompli tous les défis en {{turnNumber}} tours !',
       'game.over.all.dead': 'Fin de Partie - Tous les Joueurs Éliminés',
       'game.over.all.dead.details': 'Tous les membres du groupe sont tombés au combat.',
       'game.over.too.many.turns': 'Fin de Partie - Limite de Temps Dépassée',

@@ -29,10 +29,6 @@ export class TraitsService {
       description: { 
         en: "Avoids physical exertion and prefers rest over action.", 
         fr: "Évite l'effort physique et préfère le repos à l'action." 
-      },
-      challenge: { 
-        en: "Carry heavy supplies for the party during a full day's travel.",
-        fr: "Porter des provisions lourdes pour le groupe pendant une journée entière de voyage."
       }
     },
     { 
@@ -40,10 +36,6 @@ export class TraitsService {
       description: { 
         en: "Careless with cleanliness and appearance.", 
         fr: "Négligent avec la propreté et l'apparence." 
-      },
-      challenge: { 
-        en: "Attend a royal banquet without offending anyone with your manners.",
-        fr: "Assister à un banquet royal sans offenser personne avec tes manières."
       }
     },
     { 
@@ -51,10 +43,6 @@ export class TraitsService {
       description: { 
         en: "Often trips, drops things, or fumbles in tense moments.", 
         fr: "Trébuche souvent, fait tomber des objets ou bafouille dans les moments tendus." 
-      },
-      challenge: { 
-        en: "Disarm a delicate trap without triggering it.",
-        fr: "Désarmorcer un piège délicat sans le déclencher."
       }
     },
     { 
@@ -62,10 +50,6 @@ export class TraitsService {
       description: { 
         en: "Quick to insult or provoke others.", 
         fr: "Prompt à insulter ou provoquer les autres." 
-      },
-      challenge: { 
-        en: "Negotiate peace between two feuding villagers.",
-        fr: "Négocier la paix entre deux villageois en conflit."
       }
     },
     { 
@@ -73,10 +57,6 @@ export class TraitsService {
       description: { 
         en: "Takes pleasure in the suffering of others.", 
         fr: "Prend plaisir dans la souffrance des autres." 
-      },
-      challenge: { 
-        en: "Protect a helpless NPC without harming them.",
-        fr: "Protéger un PNJ sans défense sans lui faire de mal."
       }
     },
     { 
@@ -84,10 +64,6 @@ export class TraitsService {
       description: { 
         en: "Often pessimistic and melancholic.", 
         fr: "Souvent pessimiste et mélancolique." 
-      },
-      challenge: { 
-        en: "Inspire the party with an uplifting speech before a battle.",
-        fr: "Inspirer le groupe avec un discours encourageant avant une bataille."
       }
     },
     { 
@@ -95,10 +71,6 @@ export class TraitsService {
       description: { 
         en: "Dislikes long-term plans or obligations.", 
         fr: "N'aime pas les plans à long terme ou les obligations." 
-      },
-      challenge: { 
-        en: "Stick with the group through an entire dungeon without trying to leave.",
-        fr: "Rester avec le groupe à travers tout un donjon sans essayer de partir."
       }
     },
     { 
@@ -106,10 +78,6 @@ export class TraitsService {
       description: { 
         en: "Easily angered and quick to act without thinking.", 
         fr: "Facilement en colère et prompt à agir sans réfléchir." 
-      },
-      challenge: { 
-        en: "End a tense tavern argument without drawing your weapon.",
-        fr: "Terminer une dispute tendue de taverne sans dégainer ton arme."
       }
     },
     { 
@@ -117,10 +85,6 @@ export class TraitsService {
       description: { 
         en: "Unpredictable behavior and strange habits.", 
         fr: "Comportement imprévisible et habitudes étranges." 
-      },
-      challenge: { 
-        en: "Follow an entire plan exactly as discussed without improvising.",
-        fr: "Suivre un plan entier exactement comme discuté sans improviser."
       }
     },
     { 
@@ -128,10 +92,6 @@ export class TraitsService {
       description: { 
         en: "Prefers solitude and avoids large groups.", 
         fr: "Préfère la solitude et évite les grands groupes." 
-      },
-      challenge: { 
-        en: "Lead a crowded caravan safely to its destination.",
-        fr: "Mener une caravane bondée en sécurité vers sa destination."
       }
     },
     { 
@@ -139,10 +99,6 @@ export class TraitsService {
       description: { 
         en: "Feels uncomfortable around young ones.", 
         fr: "Se sent mal à l'aise avec les jeunes." 
-      },
-      challenge: { 
-        en: "Escort a lost child back to their family without abandoning them.",
-        fr: "Escorter un enfant perdu vers sa famille sans l'abandonner."
       }
     },
     { 
@@ -150,10 +106,6 @@ export class TraitsService {
       description: { 
         en: "Suspicious and possessive in relationships.", 
         fr: "Méfiant et possessif dans les relations." 
-      },
-      challenge: { 
-        en: "Let another party member take the spotlight in a heroic deed.",
-        fr: "Laisser un autre membre du groupe être sous les projecteurs dans un acte héroïque."
       }
     },
     { 
@@ -161,10 +113,6 @@ export class TraitsService {
       description: { 
         en: "Eats excessively and often at inopportune times.", 
         fr: "Mange excessivement et souvent à des moments inopportuns." 
-      },
-      challenge: { 
-        en: "Share your last ration with a starving stranger.",
-        fr: "Partager ta dernière ration avec un étranger affamé."
       }
     },
     { 
@@ -172,10 +120,6 @@ export class TraitsService {
       description: { 
         en: "Looks down on those of lower status or skill.", 
         fr: "Méprise ceux de statut ou de compétence inférieure." 
-      },
-      challenge: { 
-        en: "Work as an equal alongside a humble peasant to complete a task.",
-        fr: "Travailler d'égal à égal avec un humble paysan pour accomplir une tâche."
       }
     }
   ];
@@ -203,10 +147,6 @@ export class TraitsService {
     return trait.description[lang];
   }
 
-  getLocalizedTraitChallenge(trait: Trait): string {
-    const lang = this.i18n.language();
-    return trait.challenge[lang];
-  }
 
   getRandomTraits(count: number): Trait[] {
     if (count > this.AVAILABLE_TRAITS.length) {

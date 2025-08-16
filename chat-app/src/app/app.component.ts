@@ -1,20 +1,14 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PlayerImpl, LocalizedText } from './models/player.model';
+import { PlayerImpl } from './models/player.model';
 import { GameService } from './services/game.service';
 import { ApiService } from './services/api.service';
 import { TraitsService } from './services/traits.service';
-import { ChallengeService } from './services/challenge.service';
-import { GameStateService } from './services/game-state.service';
 import { ChatHistoryService } from './services/chat-history.service';
 import { DiceComponent } from './dice/dice.component';
 import { PlayerCardComponent } from './components/player-card/player-card.component';
 import { LanguageSwitcherComponent } from './components/language-switcher/language-switcher.component';
-// DEACTIVATED IMPORTS
-// import { ChallengesListComponent } from './components/challenges-list/challenges-list.component';
-// import { WinScreenComponent } from './components/win-screen/win-screen.component';
-// import { GameOverScreenComponent } from './components/game-over-screen/game-over-screen.component';
 import { I18nService } from './services/i18n.service';
 import { ElevenTtsComponent } from './components/eleven-tts/eleven-tts.component';
 import { MuteService } from './services/mute.service';
@@ -52,8 +46,6 @@ export class AppComponent implements OnInit, AfterViewChecked {
     protected gameService: GameService, 
     private apiService: ApiService,
     private traitsService: TraitsService,
-    private challengeService: ChallengeService,
-    protected gameStateService: GameStateService,
     private chatHistoryService: ChatHistoryService,
     protected i18n: I18nService,
     protected muteService: MuteService,
@@ -68,8 +60,7 @@ export class AppComponent implements OnInit, AfterViewChecked {
   private initializePlayers(): void {
     const dummyTrait = {
       name: { en: 'None', fr: 'Aucun' },
-      description: { en: 'No trait', fr: 'Aucun trait' },
-      challenge: { en: 'No challenge', fr: 'Aucun défi' }
+      description: { en: 'No trait', fr: 'Aucun trait' }
     };
 
     const players = PLAYER_CONFIGS.map(config => 
@@ -422,19 +413,16 @@ export class AppComponent implements OnInit, AfterViewChecked {
 
   // ===== GAME MANAGEMENT METHODS =====
   onRestart(): void {
-    // Reset game state
-    this.gameStateService.resetGame();
     
     // Clear chat history and messages
     this.chatHistoryService.clearCurrentSession();
     this.messages = [];
     this.newMessage = '';
     
-    // Reset all players to full health and unresolved challenges
+    // Reset all players to full health
     const allPlayers = this.gameService.getAllPlayers() as PlayerImpl[];
     allPlayers.forEach(player => {
       player.health = 3;
-      player.challengeResolved = false;
     });
     
     // Reset players to properly initialize first turn at turn 1
