@@ -68,6 +68,11 @@ interface TranslationKeys {
   'game.restart': string;
   'game.congratulations': string;
   'game.final.stats': string;
+
+  // Storage Management
+  'storage.clear.all': string;
+  'storage.clear.confirm': string;
+  'storage.clear.success': string;
 }
 
 @Injectable({
@@ -145,7 +150,12 @@ export class I18nService {
       'game.over.turn.limit.details': 'The adventure exceeded the {{maxTurns}} turn limit.',
       'game.restart': 'Start New Game',
       'game.congratulations': 'Congratulations!',
-      'game.final.stats': 'Final Statistics'
+      'game.final.stats': 'Final Statistics',
+
+      // Storage Management
+      'storage.clear.all': 'Clear all data',
+      'storage.clear.confirm': 'Are you sure you want to clear all stored data (chat history and players)? This action cannot be undone.',
+      'storage.clear.success': 'All data has been cleared successfully.'
     },
     fr: {
       // UI Components
@@ -212,7 +222,12 @@ export class I18nService {
       'game.over.turn.limit.details': 'L\'aventure a dépassé la limite de {{maxTurns}} tours.',
       'game.restart': 'Nouvelle Partie',
       'game.congratulations': 'Félicitations !',
-      'game.final.stats': 'Statistiques Finales'
+      'game.final.stats': 'Statistiques Finales',
+
+      // Storage Management
+      'storage.clear.all': 'Effacer toutes les données',
+      'storage.clear.confirm': 'Êtes-vous sûr de vouloir effacer toutes les données stockées (historique du chat et joueurs) ? Cette action est irréversible.',
+      'storage.clear.success': 'Toutes les données ont été effacées avec succès.'
     }
   };
 

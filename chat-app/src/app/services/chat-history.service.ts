@@ -499,31 +499,31 @@ export class ChatHistoryService {
           // This is the current player's own message
           role = 'assistant';
           if (lang === 'fr') {
-            playerIdentifier = 'Tu as répondu';
+            playerIdentifier = '';
           } else {
-            playerIdentifier = 'You responded';
+            playerIdentifier = '';
           }
         } else {
           // This is a teammate's message
           role = 'user'; // Teammates' messages are treated as user input for context
           if (message.playerName) {
             if (lang === 'fr') {
-              playerIdentifier = `Ton coéquipier ${message.playerName} a dit`;
+              playerIdentifier = `Ton coéquipier ${message.playerName} a dit: `;
             } else {
-              playerIdentifier = `Your teammate ${message.playerName} said`;
+              playerIdentifier = `Your teammate ${message.playerName} said: `;
             }
           } else {
             if (lang === 'fr') {
-              playerIdentifier = 'Ton coéquipier a dit';
+              playerIdentifier = 'Ton coéquipier a dit: ';
             } else {
-              playerIdentifier = 'Your teammate said';
+              playerIdentifier = 'Your teammate said: ';
             }
           }
         }
         
         messages.push({
           role,
-          content: `${playerIdentifier}: ${message.text}`
+          content: `${playerIdentifier}${message.text}`
         });
       }
     });

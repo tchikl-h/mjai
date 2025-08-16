@@ -47,6 +47,12 @@
       <h1>{{ i18n.translate('app.title') }}</h1>
       <div class="header-controls">
         <button 
+          class="clear-storage-button" 
+          (click)="clearAllStoredData()"
+          [title]="i18n.translate('storage.clear.all')">
+          <mat-icon>delete_sweep</mat-icon>
+        </button>
+        <button 
           class="mute-button" 
           (click)="toggleMute()"
           [title]="muteService.isMuted() ? 'Unmute voices' : 'Mute voices'">

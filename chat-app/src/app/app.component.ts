@@ -446,6 +446,32 @@ export class AppComponent implements OnInit, AfterViewChecked {
     return cleaned;
   }
 
+  // ===== STORAGE MANAGEMENT METHODS =====
+  clearAllStoredData(): void {
+    const confirmMessage = this.i18n.translate('storage.clear.confirm');
+    
+    if (confirm(confirmMessage)) {
+      // Clear chat history from storage
+      this.chatHistoryService.clearStoredHistory();
+      this.chatHistoryService.clearCurrentSession();
+      this.messages = [];
+      
+      // Clear players from storage
+      this.playerManagementService.clearStoredPlayers();
+      
+      // Reset to default players
+      this.initializePlayers();
+      
+      // Save the default players to storage
+      this.saveInitialPlayersToStorage();
+      
+      const successMessage = this.i18n.translate('storage.clear.success');
+      
+      console.log('All stored data cleared');
+      alert(successMessage);
+    }
+  }
+
   // ===== GAME MANAGEMENT METHODS =====
   onRestart(): void {
     
