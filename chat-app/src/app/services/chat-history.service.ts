@@ -26,13 +26,16 @@ export interface ChatSession {
   providedIn: 'root'
 })
 export class ChatHistoryService {
-  private currentSession: ChatSession;
+  private currentSession!: ChatSession;
   private allSessions: ChatSession[] = [];
   private messageIdCounter = 0;
+  private readonly CURRENT_SESSION_KEY = 'mjai-current-session';
+  private readonly ALL_SESSIONS_KEY = 'mjai-all-sessions';
+  private readonly MESSAGE_COUNTER_KEY = 'mjai-message-counter';
 
   constructor(private i18n: I18nService) {
-    // Initialize a new session
-    this.currentSession = this.createNewSession();
+    // Load existing data from storage or initialize new session
+    this.loadFromStorage();
   }
 
   private createNewSession(): ChatSession {
@@ -87,6 +90,9 @@ export class ChatHistoryService {
       turnNumber: message.turnNumber,
       totalMessages: this.currentSession.totalMessages
     });
+
+    // Save to storage after adding message
+    this.saveToStorage();
 
     return message;
   }
@@ -188,6 +194,9 @@ export class ChatHistoryService {
     this.currentSession = this.createNewSession();
     this.messageIdCounter = 0;
     
+    // Save to storage after clearing session
+    this.saveToStorage();
+    
     console.log('Chat History: Session cleared and new session started');
   }
 
@@ -286,6 +295,7 @@ export class ChatHistoryService {
     if (index !== -1) {
       this.currentSession.messages.splice(index, 1);
       this.currentSession.totalMessages--;
+      this.saveToStorage();
       console.log(`Chat History: Removed message ${messageId}`);
       return true;
     }
@@ -296,6 +306,7 @@ export class ChatHistoryService {
     const message = this.currentSession.messages.find(msg => msg.id === messageId);
     if (message) {
       message.text = newText;
+      this.saveToStorage();
       console.log(`Chat History: Updated message ${messageId}`);
       return true;
     }
@@ -526,5 +537,120 @@ export class ChatHistoryService {
     });
     
     return messages;
+  }
+
+  /**
+   * Save current session and message counter to local storage
+   */
+  private saveToStorage(): void {
+    try {
+      // Convert dates to ISO strings for serialization
+      const serializableSession = {
+        ...this.currentSession,
+        startTime: this.currentSession.startTime.toISOString(),
+        endTime: this.currentSession.endTime?.toISOString(),
+        messages: this.currentSession.messages.map(msg => ({
+          ...msg,
+          timestamp: msg.timestamp.toISOString(),
+          // Remove player object reference to avoid circular serialization
+          player: undefined
+        }))
+      };
+
+      localStorage.setItem(this.CURRENT_SESSION_KEY, JSON.stringify(serializableSession));
+      localStorage.setItem(this.MESSAGE_COUNTER_KEY, this.messageIdCounter.toString());
+
+      // Save all sessions
+      const serializableAllSessions = this.allSessions.map(session => ({
+        ...session,
+        startTime: session.startTime.toISOString(),
+        endTime: session.endTime?.toISOString(),
+        messages: session.messages.map(msg => ({
+          ...msg,
+          timestamp: msg.timestamp.toISOString(),
+          player: undefined
+        }))
+      }));
+
+      localStorage.setItem(this.ALL_SESSIONS_KEY, JSON.stringify(serializableAllSessions));
+      
+      console.log('Chat History: Saved to local storage');
+    } catch (error) {
+      console.error('Failed to save chat history to local storage:', error);
+    }
+  }
+
+  /**
+   * Load session data from local storage
+   */
+  private loadFromStorage(): void {
+    try {
+      // Load message counter
+      const savedCounter = localStorage.getItem(this.MESSAGE_COUNTER_KEY);
+      if (savedCounter) {
+        this.messageIdCounter = parseInt(savedCounter, 10) || 0;
+      }
+
+      // Load current session
+      const savedCurrentSession = localStorage.getItem(this.CURRENT_SESSION_KEY);
+      if (savedCurrentSession) {
+        const parsedSession = JSON.parse(savedCurrentSession);
+        
+        // Convert ISO strings back to Date objects
+        this.currentSession = {
+          ...parsedSession,
+          startTime: new Date(parsedSession.startTime),
+          endTime: parsedSession.endTime ? new Date(parsedSession.endTime) : undefined,
+          messages: parsedSession.messages.map((msg: any) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp)
+          }))
+        };
+
+        console.log(`Chat History: Loaded current session with ${this.currentSession.messages.length} messages`);
+      } else {
+        // No saved session, create new one
+        this.currentSession = this.createNewSession();
+      }
+
+      // Load all sessions
+      const savedAllSessions = localStorage.getItem(this.ALL_SESSIONS_KEY);
+      if (savedAllSessions) {
+        const parsedSessions = JSON.parse(savedAllSessions);
+        
+        this.allSessions = parsedSessions.map((session: any) => ({
+          ...session,
+          startTime: new Date(session.startTime),
+          endTime: session.endTime ? new Date(session.endTime) : undefined,
+          messages: session.messages.map((msg: any) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp)
+          }))
+        }));
+
+        console.log(`Chat History: Loaded ${this.allSessions.length} archived sessions`);
+      }
+
+    } catch (error) {
+      console.error('Failed to load chat history from local storage:', error);
+      // Fall back to creating a new session
+      this.currentSession = this.createNewSession();
+      this.allSessions = [];
+      this.messageIdCounter = 0;
+    }
+  }
+
+  /**
+   * Clear all chat history from local storage
+   */
+  clearStoredHistory(): void {
+    try {
+      localStorage.removeItem(this.CURRENT_SESSION_KEY);
+      localStorage.removeItem(this.ALL_SESSIONS_KEY);
+      localStorage.removeItem(this.MESSAGE_COUNTER_KEY);
+      console.log('Chat History: Cleared from local storage');
+    } catch (error) {
+      console.error('Failed to clear chat history from local storage:', error);
+    }
   }
 }

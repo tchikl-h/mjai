@@ -3,15 +3,29 @@ import { PlayerImpl } from '../models/player.model';
 import { GameService } from './game.service';
 import { LoggerService } from './logger.service';
 
+interface StoredPlayerData {
+  name: string;
+  backstory: string;
+  imageUri: string;
+  health: number;
+  inventory: string;
+  traits: string;
+  attacks: string;
+  voiceId: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class PlayerManagementService {
+  private readonly STORAGE_KEY = 'mjai-players';
   
   constructor(
     private gameService: GameService,
     private logger: LoggerService
-  ) {}
+  ) {
+    this.loadPlayersFromStorage();
+  }
 
   /**
    * Add a new player to the game
@@ -41,6 +55,7 @@ export class PlayerManagementService {
       // Add to existing players
       const currentPlayers = [...existingPlayers, newPlayer];
       this.gameService.setPlayers(currentPlayers);
+      this.savePlayersToStorage();
       
       this.logger.info(`Player "${playerData.name}" added successfully`);
       return true;
@@ -89,6 +104,7 @@ export class PlayerManagementService {
 
       allPlayers[playerIndex] = updatedPlayer;
       this.gameService.setPlayers(allPlayers);
+      this.savePlayersToStorage();
       
       this.logger.info(`Player "${originalName}" updated successfully`);
       return true;
@@ -112,6 +128,7 @@ export class PlayerManagementService {
       }
 
       this.gameService.setPlayers(filteredPlayers);
+      this.savePlayersToStorage();
       
       this.logger.info(`Player "${playerName}" removed successfully`);
       return true;
@@ -145,5 +162,77 @@ export class PlayerManagementService {
    */
   getAllPlayers(): PlayerImpl[] {
     return this.gameService.getAllPlayers();
+  }
+
+  /**
+   * Save players to local storage
+   */
+  private savePlayersToStorage(): void {
+    try {
+      const players = this.gameService.getAllPlayers();
+      const storedData: StoredPlayerData[] = players.map(player => ({
+        name: player.name,
+        backstory: player.backstory,
+        imageUri: player.imageUri,
+        health: player.health,
+        inventory: player.inventory,
+        traits: player.traits,
+        attacks: player.attacks,
+        voiceId: player.voiceId
+      }));
+      
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(storedData));
+      this.logger.info('Players saved to local storage');
+    } catch (error) {
+      this.logger.error('Failed to save players to local storage', error);
+    }
+  }
+
+  /**
+   * Load players from local storage
+   */
+  private loadPlayersFromStorage(): void {
+    try {
+      const stored = localStorage.getItem(this.STORAGE_KEY);
+      if (stored) {
+        const storedData: StoredPlayerData[] = JSON.parse(stored);
+        const players = storedData.map(data => new PlayerImpl(
+          data.name,
+          data.backstory,
+          data.imageUri,
+          data.traits,
+          data.health,
+          data.inventory,
+          data.attacks,
+          data.voiceId
+        ));
+        
+        if (players.length > 0) {
+          this.gameService.setPlayers(players);
+          this.logger.info(`Loaded ${players.length} players from local storage`);
+        }
+      }
+    } catch (error) {
+      this.logger.error('Failed to load players from local storage', error);
+    }
+  }
+
+  /**
+   * Save current players to local storage (public method)
+   */
+  saveCurrentPlayersToStorage(): void {
+    this.savePlayersToStorage();
+  }
+
+  /**
+   * Clear players from local storage
+   */
+  clearStoredPlayers(): void {
+    try {
+      localStorage.removeItem(this.STORAGE_KEY);
+      this.logger.info('Players cleared from local storage');
+    } catch (error) {
+      this.logger.error('Failed to clear players from local storage', error);
+    }
   }
 }

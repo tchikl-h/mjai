@@ -61,14 +61,44 @@ export class AppComponent implements OnInit, AfterViewChecked {
 
   ngOnInit() {
     this.initializePlayers();
+    this.loadChatMessages();
     this.setupChatHistoryConsoleAccess();
   }
 
   private initializePlayers(): void {
-    const players = Object.values(PLAYERS).map(config => 
-      new PlayerImpl(config.name, config.backstory, config.imageUri, config.traits, config.health, config.inventory, config.attacks, config.voiceId)
-    );
-    this.gameService.setPlayers(players);
+    // Check if players are already loaded from storage by the PlayerManagementService
+    const currentPlayers = this.gameService.getAllPlayers();
+    if (currentPlayers.length === 0) {
+      // No players in storage, initialize with default players
+      const players = Object.values(PLAYERS).map(config => 
+        new PlayerImpl(config.name, config.backstory, config.imageUri, config.traits, config.health, config.inventory, config.attacks, config.voiceId)
+      );
+      this.gameService.setPlayers(players);
+      
+      // Save the default players to storage for future sessions
+      this.saveInitialPlayersToStorage();
+    }
+  }
+
+  private saveInitialPlayersToStorage(): void {
+    // Use setTimeout to ensure the gameService has been updated before saving
+    setTimeout(() => {
+      this.playerManagementService.saveCurrentPlayersToStorage();
+    }, 0);
+  }
+
+  private loadChatMessages(): void {
+    // Load stored chat messages into the UI
+    const storedMessages = this.chatHistoryService.getAllMessages();
+    this.messages = storedMessages.map(chatMsg => ({
+      text: chatMsg.text,
+      sender: chatMsg.sender,
+      timestamp: chatMsg.timestamp,
+      player: chatMsg.player,
+      isStreaming: false
+    }));
+    
+    console.log(`Loaded ${this.messages.length} messages from storage`);
   }
 
   private setupChatHistoryConsoleAccess(): void {
@@ -203,6 +233,9 @@ export class AppComponent implements OnInit, AfterViewChecked {
     player.health = Math.max(0, Math.min(3, player.health));
     
     console.log(`${player.name} health changed to: ${player.health}`);
+    
+    // Save player state changes to storage
+    this.playerManagementService.saveCurrentPlayersToStorage();
     
     // Check if player died or was revived
     if (previousHealth > 0 && player.health === 0) {
@@ -430,6 +463,9 @@ export class AppComponent implements OnInit, AfterViewChecked {
     // Reset players to properly initialize first turn at turn 1
     this.gameService.setPlayers(allPlayers);
     
+    // Save the updated player states to storage
+    this.playerManagementService.saveCurrentPlayersToStorage();
+    
     console.log('Game restarted');
   }
 
@@ -448,6 +484,7 @@ export class AppComponent implements OnInit, AfterViewChecked {
 
   clearChatHistory(): void {
     this.chatHistoryService.clearCurrentSession();
+    this.chatHistoryService.clearStoredHistory();
     this.messages = [];
     console.log('Chat history cleared');
   }
