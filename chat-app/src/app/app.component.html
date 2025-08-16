@@ -111,6 +111,13 @@
         
         <div class="message-content">
           <span class="message-text">{{ message.text }}</span>
+          <span *ngIf="message.isStreaming" class="streaming-indicator">
+            <span class="typing-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+          </span>
           <span class="message-time">{{ message.timestamp | date:'HH:mm' }}</span>
         </div>
       </div>

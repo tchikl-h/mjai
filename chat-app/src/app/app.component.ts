@@ -26,6 +26,8 @@ interface Message {
   sender:'player' | 'mj';
   timestamp: Date;
   player?: PlayerImpl;
+  isStreaming?: boolean;
+  streamingId?: string;
 }
 
 @Component({
@@ -275,9 +277,66 @@ export class AppComponent implements OnInit, AfterViewChecked {
       // Get the latest GM message if no specific message provided
       const messageToRespond = mjMessage || this.getLatestGMMessage();
       
-      const playerResponse = await this.apiService.generatePlayerResponse(player, messageToRespond);
-      this.addPlayerMessage(playerResponse, player as PlayerImpl);
-      this.speakCharacterText(player as PlayerImpl, playerResponse);
+      // Create a streaming message placeholder
+      const streamingId = `streaming-${Date.now()}-${Math.random()}`;
+      const streamingMessage: Message = {
+        text: '',
+        sender: 'player',
+        timestamp: new Date(),
+        player: player as PlayerImpl,
+        isStreaming: true,
+        streamingId: streamingId
+      };
+      
+      this.messages.push(streamingMessage);
+      let fullResponse = '';
+      
+      // Subscribe to the streaming response
+      this.apiService.generatePlayerResponseStream(player, messageToRespond).subscribe({
+        next: (data) => {
+          if (data.isComplete) {
+            // Stream is complete, finalize the message
+            const messageIndex = this.messages.findIndex(m => m.streamingId === streamingId);
+            if (messageIndex !== -1) {
+              this.messages[messageIndex].isStreaming = false;
+              this.messages[messageIndex].text = data.fullResponse || fullResponse;
+              delete this.messages[messageIndex].streamingId;
+              
+              // Add to chat history
+              this.chatHistoryService.addMessage(
+                data.fullResponse || fullResponse, 
+                'player', 
+                player as PlayerImpl, 
+                this.getCurrentTurnNumber()
+              );
+              
+              // Speak the full response
+              this.speakCharacterText(player as PlayerImpl, data.fullResponse || fullResponse);
+            }
+          } else if (data.sentence) {
+            // Add sentence to the streaming message
+            fullResponse += (fullResponse ? ' ' : '') + data.sentence;
+            const messageIndex = this.messages.findIndex(m => m.streamingId === streamingId);
+            if (messageIndex !== -1) {
+              this.messages[messageIndex].text = fullResponse;
+            }
+          }
+        },
+        error: (error) => {
+          console.error('Error generating streaming player response:', error);
+          
+          // Remove streaming message and add fallback
+          const messageIndex = this.messages.findIndex(m => m.streamingId === streamingId);
+          if (messageIndex !== -1) {
+            this.messages.splice(messageIndex, 1);
+          }
+          
+          const fallbackText = 'I listen carefully to your words.';
+          this.addPlayerMessage(fallbackText, player as PlayerImpl);
+          this.speakCharacterText(player as PlayerImpl, fallbackText);
+        }
+      });
+      
     } catch (error) {
       console.error('Error generating player response:', error);
       const player = specificPlayer || this.gameService.getCurrentTurn().getCurrentPlayer();
