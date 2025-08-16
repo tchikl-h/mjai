@@ -20,6 +20,14 @@
         (playerEdit)="openEditPlayerModal($event)"
         (playerDelete)="removePlayer($event)">
       </app-player-card>
+      
+      <!-- Add Player Card -->
+      <div class="add-player-card" (click)="openAddPlayerModal()">
+        <div class="add-player-content">
+          <mat-icon class="add-player-icon">add</mat-icon>
+          <span class="add-player-text">{{ i18n.translate('player.add') }}</span>
+        </div>
+      </div>
     </div>
 
     <!-- New Turn Button -->
@@ -29,12 +37,6 @@
         class="new-turn-button"
         [title]="'Start new turn with reshuffled player order'">
         🔄 New Turn
-      </button>
-      <button 
-        (click)="openAddPlayerModal()" 
-        class="add-player-button"
-        [title]="i18n.translate('player.add')">
-        ➕ {{ i18n.translate('player.add') }}
       </button>
     </div>
   </div>
