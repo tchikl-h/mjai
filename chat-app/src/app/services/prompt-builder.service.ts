@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { PlayerImpl } from '../models/player.model';
 import { I18nService } from './i18n.service';
+import { PLAYER_DESCRIPTIONS, PlayerName } from '../config/players.config';
 
 const PROMPT_CONFIG = {
   BASE_PREPROMPT: {
@@ -68,28 +69,11 @@ export class PromptBuilderService {
 
   private getLocalizedPlayerDescription(player: PlayerImpl): string {
     const lang = this.i18n.language();
-    
-    // Localized character descriptions
-    const descriptions: Record<string, { en: string; fr: string }> = {
-      'Warrior': {
-        en: "A broad-shouldered warrior clad in weather-worn plate, the steel dulled by countless battles. A deep scar runs from his temple to his jaw, a silent testament to survival. His voice is gravel, his stare unshaken, and his hand never strays far from the hilt of his greatsword. Korran speaks little, but when he does, his words cut as sharply as his blade.",
-        fr: "Un guerrier aux larges épaules vêtu d'une armure de plates usée par les intempéries, l'acier terni par d'innombrables batailles. Une profonde cicatrice court de sa tempe à sa mâchoire, témoignage silencieux de sa survie. Sa voix est graveleuse, son regard inébranlable, et sa main ne s'éloigne jamais du pommeau de sa grande épée. Korran parle peu, mais quand il le fait, ses mots tranchent aussi vivement que sa lame."
-      },
-      'Mage': {
-        en: "Draped in flowing midnight-blue robes embroidered with silver constellations, Selvara's eyes shimmer like starlight on still water. A slender crystal-tipped staff rests in her hand, pulsing faintly with arcane energy. Her voice is calm but edged with power, each word carrying the weight of ancient knowledge and the promise of unbridled magic.",
-        fr: "Drapée dans des robes bleu nuit fluides brodées de constellations argentées, les yeux de Selvara scintillent comme des étoiles sur une eau calme. Un bâton élancé à pointe de cristal repose dans sa main, pulsant faiblement d'énergie arcanique. Sa voix est calme mais teintée de puissance, chaque mot portant le poids d'un savoir ancien et la promesse d'une magie débridée."
-      },
-      'Rogue': {
-        en: "Lean and sharp-eyed, Ryn moves like a shadow slipping between torchlight. A dark hood hides most of his face, but the glint of a knowing smirk can be seen when danger's near. Twin daggers rest at his hips, their edges whispering promises of silent endings. He speaks little, but every word feels like a calculated move in an unseen game.",
-        fr: "Élancé et aux yeux perçants, Ryn se déplace comme une ombre glissant entre les torches. Une capuche sombre cache la majeure partie de son visage, mais l'éclat d'un sourire entendu se devine quand le danger approche. Deux dagues reposent à ses hanches, leurs lames murmurant des promesses de fins silencieuses. Il parle peu, mais chaque mot semble un mouvement calculé dans un jeu invisible."
-      },
-      'Hunter': {
-        en: "Wrapped in a weathered cloak of mottled greens and browns, Kaelen blends into the wild as naturally as wind through leaves. A longbow rests easily in his hand, its grip worn smooth from years of use. His sharp eyes miss nothing, tracking prey—or threats—with the patience of a predator. Quiet and steady, Kaelen speaks in few words, each rooted in the rhythm of the hunt.",
-        fr: "Enveloppé d'un manteau usé aux verts et bruns tachetés, Kaelen se fond dans la nature aussi naturellement que le vent à travers les feuilles. Un arc long repose aisément dans sa main, sa poignée polie par des années d'usage. Ses yeux perçants ne ratent rien, traquant proie ou menace avec la patience d'un prédateur. Silencieux et posé, Kaelen parle peu, chaque mot enraciné dans le rythme de la chasse."
-      }
-    };
-
-    return descriptions[player.name]?.[lang] || player.description;
+    const descriptions = PLAYER_DESCRIPTIONS[player.name as PlayerName];
+    if (descriptions && (lang === 'en' || lang === 'fr')) {
+      return descriptions[lang];
+    }
+    return player.description;
   }
 
   buildMessagePrompt(mjMessage: string): string {

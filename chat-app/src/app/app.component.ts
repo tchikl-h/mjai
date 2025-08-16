@@ -19,6 +19,7 @@ import { I18nService } from './services/i18n.service';
 import { ElevenTtsComponent } from './components/eleven-tts/eleven-tts.component';
 import { MuteService } from './services/mute.service';
 import { AudioRecordingService } from './services/audio-recording.service';
+import { PLAYER_CONFIGS, CHARACTER_VOICES } from './config/players.config';
 
 interface Message {
   text: string;
@@ -43,12 +44,7 @@ export class AppComponent implements OnInit, AfterViewChecked {
   // TTS Properties
   currentSpeakingCharacter: string = '';
   currentSpeechText: string = '';
-  characterVoices: Record<string, string> = {
-    'Warrior': '2EiwWnXFnvU5JabPnv8n', // Deep male voice
-    'Mage': '9BWtsMINqrJLrRacOk9x', // Mystical female voice
-    'Rogue': 'CYw3kZ02Hs0563khs1Fj', // Sneaky male voice
-    'Hunter': 'CwhRBWXzGAHq8TQ4Fs17', // Nature-focused voice
-  };
+  characterVoices: Record<string, string> = CHARACTER_VOICES;
 
   constructor(
     protected gameService: GameService, 
@@ -74,12 +70,9 @@ export class AppComponent implements OnInit, AfterViewChecked {
       challenge: { en: 'No challenge', fr: 'Aucun défi' }
     };
 
-    const players = [
-      new PlayerImpl("Warrior", "A broad-shouldered warrior clad in weather-worn plate, the steel dulled by countless battles. A deep scar runs from his temple to his jaw, a silent testament to survival. His voice is gravel, his stare unshaken, and his hand never strays far from the hilt of his greatsword. Korran speaks little, but when he does, his words cut as sharply as his blade.", "assets/images/warrior.png", dummyTrait),
-      new PlayerImpl("Mage", "Draped in flowing midnight-blue robes embroidered with silver constellations, Selvara's eyes shimmer like starlight on still water. A slender crystal-tipped staff rests in her hand, pulsing faintly with arcane energy. Her voice is calm but edged with power, each word carrying the weight of ancient knowledge and the promise of unbridled magic.", "assets/images/mage.png", dummyTrait),
-      new PlayerImpl("Rogue", "Lean and sharp-eyed, Ryn moves like a shadow slipping between torchlight. A dark hood hides most of his face, but the glint of a knowing smirk can be seen when danger's near. Twin daggers rest at his hips, their edges whispering promises of silent endings. He speaks little, but every word feels like a calculated move in an unseen game.", "assets/images/rogue.png", dummyTrait),
-      new PlayerImpl("Hunter", "Wrapped in a weathered cloak of mottled greens and browns, Kaelen blends into the wild as naturally as wind through leaves. A longbow rests easily in his hand, its grip worn smooth from years of use. His sharp eyes miss nothing, tracking prey—or threats—with the patience of a predator. Quiet and steady, Kaelen speaks in few words, each rooted in the rhythm of the hunt.", "assets/images/hunter.png", dummyTrait),
-    ];
+    const players = PLAYER_CONFIGS.map(config => 
+      new PlayerImpl(config.name, config.description, config.imagePath, dummyTrait)
+    );
     this.gameService.setPlayers(players);
   }
 

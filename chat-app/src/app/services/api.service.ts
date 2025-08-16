@@ -68,7 +68,7 @@ export class ApiService {
         const context = this.chatHistory.getContext(player);
         
         if (context && context !== "This is the start of our adventure.") {
-          request.context = `Recent conversation:\n${context}\n\nNow respond to the GM's latest message, staying in character and considering the conversation flow above.`;
+          request.context = `Recent conversation:\n${context}`;
         }
         
         this.logger.info(`Context generated for ${player.name}`, {

@@ -224,8 +224,8 @@ export class ChatHistoryService {
         fr: 'Ton coéquipier'
       },
       'end_conversation': {
-        en: '[End of recent conversation - you are now responding to the latest GM message]',
-        fr: '[Fin de conversation récente - tu réponds maintenant au dernier message du MJ]'
+        en: '[End of recent conversation - What do you do/respond ?]',
+        fr: '[Fin de conversation récente - Que fais-tu/que réponds-tu ?]'
       },
       'recent_context': {
         en: 'Recent conversation context - showing last',
@@ -306,10 +306,10 @@ export class ChatHistoryService {
    * Get conversation context for AI - formats the last N messages into a coherent context string
    * @param player The player requesting context (for personalized formatting)
    * @param messageCount Number of recent messages to include (default: 15)
-   * @param includeTurnInfo Whether to include turn numbers for better context (default: true)
+   * @param includeTurnInfo Whether to include turn numbers for better context (default: false)
    * @returns Formatted context string ready for AI prompts
    */
-  getContext(player: PlayerImpl, messageCount: number = 15, includeTurnInfo: boolean = true): string {
+  getContext(player: PlayerImpl, messageCount: number = 15, includeTurnInfo: boolean = false): string {
     // Get the last N messages
     const recentMessages = this.getLastNMessages(messageCount);
     
