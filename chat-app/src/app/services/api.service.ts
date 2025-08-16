@@ -29,6 +29,14 @@ export class ApiService {
     
     try {
       const request = this.buildChatRequest(player, mjMessage);
+      
+      // Log the full prompt details for debugging
+      console.log(`🤖 Player Response Request for ${player.name}:`);
+      console.log(`📝 Player Description: ${request.playerDescription}`);
+      console.log(`💬 GM Message: ${request.mjMessage}`);
+      console.log(`🕰️ Context: ${request.context || 'No context provided'}`);
+      console.log('📦 Full Request:', request);
+      
       this.logger.logApiRequest(request);
 
       const response = await this.makeChatRequest(request, options);

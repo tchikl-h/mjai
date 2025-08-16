@@ -4,7 +4,7 @@ import { Injectable, signal, WritableSignal } from '@angular/core';
   providedIn: 'root'
 })
 export class MuteService {
-  private _isMuted: WritableSignal<boolean> = signal(false);
+  private _isMuted: WritableSignal<boolean> = signal(true);
 
   get isMuted() {
     return this._isMuted.asReadonly();

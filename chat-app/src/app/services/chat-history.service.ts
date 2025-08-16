@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { PlayerImpl } from '../models/player.model';
+import { I18nService } from './i18n.service';
 
 export interface ChatMessage {
   id: string;
@@ -29,7 +30,7 @@ export class ChatHistoryService {
   private allSessions: ChatSession[] = [];
   private messageIdCounter = 0;
 
-  constructor() {
+  constructor(private i18n: I18nService) {
     // Initialize a new session
     this.currentSession = this.createNewSession();
   }
@@ -190,6 +191,87 @@ export class ChatHistoryService {
     console.log('Chat History: Session cleared and new session started');
   }
 
+  private getLocalizedText(key: string): string {
+    const lang = this.i18n.language();
+    
+    const texts: Record<string, { en: string; fr: string }> = {
+      'conversation_beginning': {
+        en: 'This is the beginning of the conversation.',
+        fr: 'Ceci est le début de la conversation.'
+      },
+      'adventure_start': {
+        en: 'This is the start of our adventure.',
+        fr: 'Ceci est le début de notre aventure.'
+      },
+      'turn_just_started': {
+        en: 'This turn just started.',
+        fr: 'Ce tour vient de commencer.'
+      },
+      'gm_told': {
+        en: 'The GM told:',
+        fr: 'Le MJ a dit :'
+      },
+      'you_responded': {
+        en: 'You responded:',
+        fr: 'Tu as répondu :'
+      },
+      'player_responded': {
+        en: 'A player responded:',
+        fr: 'Un joueur a répondu :'
+      },
+      'teammate_responded': {
+        en: 'Your teammate',
+        fr: 'Ton coéquipier'
+      },
+      'end_conversation': {
+        en: '[End of recent conversation - you are now responding to the latest GM message]',
+        fr: '[Fin de conversation récente - tu réponds maintenant au dernier message du MJ]'
+      },
+      'recent_context': {
+        en: 'Recent conversation context - showing last',
+        fr: 'Contexte de conversation récente - affichage des'
+      },
+      'of_messages': {
+        en: 'of',
+        fr: 'sur'
+      },
+      'messages': {
+        en: 'messages',
+        fr: 'messages'
+      },
+      'conversation_context': {
+        en: 'Conversation context',
+        fr: 'Contexte de conversation'
+      },
+      'turn': {
+        en: 'Turn',
+        fr: 'Tour'
+      },
+      'turn_so_far': {
+        en: 'so far',
+        fr: 'jusqu\'à présent'
+      },
+      'gm_said': {
+        en: 'The GM said',
+        fr: 'Le MJ a dit'
+      },
+      'you_said': {
+        en: 'You said',
+        fr: 'Tu as dit'
+      },
+      'companion_said': {
+        en: 'Your companion named',
+        fr: 'Ton compagnon nommé'
+      },
+      'said': {
+        en: 'said',
+        fr: 'a dit'
+      }
+    };
+
+    return texts[key]?.[lang] || texts[key]?.en || key;
+  }
+
   getAllSessions(): ChatSession[] {
     return [...this.allSessions];
   }
@@ -232,7 +314,7 @@ export class ChatHistoryService {
     const recentMessages = this.getLastNMessages(messageCount);
     
     if (recentMessages.length === 0) {
-      return "This is the beginning of the conversation.";
+      return this.getLocalizedText('conversation_beginning');
     }
 
     // Build context string
@@ -240,9 +322,14 @@ export class ChatHistoryService {
     
     // Add context header
     if (recentMessages.length === messageCount && this.currentSession.totalMessages > messageCount) {
-      contextLines.push(`[Recent conversation context - showing last ${messageCount} of ${this.currentSession.totalMessages} messages]\n`);
+      const recentContext = this.getLocalizedText('recent_context');
+      const ofText = this.getLocalizedText('of_messages');
+      const messagesText = this.getLocalizedText('messages');
+      contextLines.push(`[${recentContext} ${messageCount} ${ofText} ${this.currentSession.totalMessages} ${messagesText}]\n`);
     } else if (this.currentSession.totalMessages > 1) {
-      contextLines.push(`[Conversation context - ${recentMessages.length} messages]\n`);
+      const conversationContext = this.getLocalizedText('conversation_context');
+      const messagesText = this.getLocalizedText('messages');
+      contextLines.push(`[${conversationContext} - ${recentMessages.length} ${messagesText}]\n`);
     }
 
     // Process messages chronologically (already in order)
@@ -257,20 +344,23 @@ export class ChatHistoryService {
         if (lastTurnNumber !== -1) {
           contextLines.push(''); // Empty line between turns
         }
-        turnIndicator = `[Turn ${message.turnNumber}] `;
+        const turnText = this.getLocalizedText('turn');
+        turnIndicator = `[${turnText} ${message.turnNumber}] `;
         lastTurnNumber = message.turnNumber;
       }
       
       // Determine message prefix based on sender and player
       if (message.sender === 'mj') {
-        prefix = 'The GM told: ';
+        prefix = this.getLocalizedText('gm_told') + ' ';
       } else if (message.playerName === player.name) {
-        prefix = 'You responded: ';
+        prefix = this.getLocalizedText('you_responded') + ' ';
       } else if (message.playerName) {
-        prefix = `${message.playerName} responded: `;
+        const teammateText = this.getLocalizedText('teammate_responded');
+        const respondedText = this.getLocalizedText('you_responded').replace('You responded:', 'responded:').replace('Tu as répondu :', 'a répondu :');
+        prefix = `${teammateText} ${message.playerName} ${respondedText} `;
       } else {
         // Fallback for messages without player name
-        prefix = 'A player responded: ';
+        prefix = this.getLocalizedText('player_responded') + ' ';
       }
       
       // Clean up message text (remove excessive whitespace, normalize)
@@ -283,7 +373,7 @@ export class ChatHistoryService {
     
     // Add footer to indicate this is the current state
     contextLines.push('');
-    contextLines.push('[End of recent conversation - you are now responding to the latest GM message]');
+    contextLines.push(this.getLocalizedText('end_conversation'));
     
     const context = contextLines.join('\n');
     
@@ -305,7 +395,7 @@ export class ChatHistoryService {
     const recentMessages = this.getLastNMessages(messageCount);
     
     if (recentMessages.length === 0) {
-      return "This is the start of our adventure.";
+      return this.getLocalizedText('adventure_start');
     }
 
     const contextParts: string[] = [];
@@ -340,19 +430,23 @@ export class ChatHistoryService {
     const turnMessages = this.getMessagesInTurn(currentTurnNumber);
     
     if (turnMessages.length === 0) {
-      return "This turn just started.";
+      return this.getLocalizedText('turn_just_started');
     }
 
-    const contextParts: string[] = [`[Turn ${currentTurnNumber} so far]`];
+    const turnText = this.getLocalizedText('turn');
+    const soFarText = this.getLocalizedText('turn_so_far');
+    const contextParts: string[] = [`[${turnText} ${currentTurnNumber} ${soFarText}]`];
     
     turnMessages.forEach(message => {
       let speaker = '';
       if (message.sender === 'mj') {
-        speaker = 'The GM said';
+        speaker = this.getLocalizedText('gm_said');
       } else if (message.playerName === player.name) {
-        speaker = 'You said';
+        speaker = this.getLocalizedText('you_said');
       } else if (message.playerName) {
-        speaker = `${message.playerName} said`;
+        const companionText = this.getLocalizedText('companion_said');
+        const saidText = this.getLocalizedText('said');
+        speaker = `${companionText} ${message.playerName} ${saidText}`;
       }
       
       const cleanText = message.text.replace(/\s+/g, ' ').trim();
