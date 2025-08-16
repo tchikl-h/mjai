@@ -8,10 +8,12 @@ import { ChatHistoryService } from './services/chat-history.service';
 import { DiceComponent } from './dice/dice.component';
 import { PlayerCardComponent } from './components/player-card/player-card.component';
 import { LanguageSwitcherComponent } from './components/language-switcher/language-switcher.component';
+import { PlayerModalComponent } from './components/player-modal/player-modal.component';
 import { I18nService } from './services/i18n.service';
 import { ElevenTtsComponent } from './components/eleven-tts/eleven-tts.component';
 import { MuteService } from './services/mute.service';
 import { AudioRecordingService } from './services/audio-recording.service';
+import { PlayerManagementService } from './services/player-management.service';
 import { PLAYERS, PLAYER_CONFIGS, CHARACTER_VOICES } from './config/players.config';
 
 interface Message {
@@ -26,7 +28,7 @@ interface Message {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule, DiceComponent, PlayerCardComponent, LanguageSwitcherComponent, ElevenTtsComponent],
+  imports: [CommonModule, FormsModule, DiceComponent, PlayerCardComponent, LanguageSwitcherComponent, PlayerModalComponent, ElevenTtsComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
@@ -41,10 +43,16 @@ export class AppComponent implements OnInit, AfterViewChecked {
   currentSpeechText: string = '';
   characterVoices: Record<string, string> = CHARACTER_VOICES;
 
+  // Player Management
+  isPlayerModalOpen = false;
+  isEditMode = false;
+  editingPlayer: PlayerImpl | null = null;
+
   constructor(
     protected gameService: GameService, 
     private apiService: ApiService,
     private chatHistoryService: ChatHistoryService,
+    private playerManagementService: PlayerManagementService,
     protected i18n: I18nService,
     protected muteService: MuteService,
     protected audioRecordingService: AudioRecordingService
@@ -475,6 +483,63 @@ export class AppComponent implements OnInit, AfterViewChecked {
       }
     } catch (err) {
       console.error('Error scrolling to bottom:', err);
+    }
+  }
+
+  // ===== PLAYER MANAGEMENT METHODS =====
+  openAddPlayerModal(): void {
+    this.isEditMode = false;
+    this.editingPlayer = null;
+    this.isPlayerModalOpen = true;
+  }
+
+  openEditPlayerModal(player: PlayerImpl): void {
+    this.isEditMode = true;
+    this.editingPlayer = player;
+    this.isPlayerModalOpen = true;
+  }
+
+  closePlayerModal(): void {
+    this.isPlayerModalOpen = false;
+    this.isEditMode = false;
+    this.editingPlayer = null;
+  }
+
+  onPlayerSave(player: PlayerImpl): void {
+    if (this.isEditMode && this.editingPlayer) {
+      // Update existing player
+      const success = this.playerManagementService.updatePlayer(this.editingPlayer.name, player);
+      if (success) {
+        console.log(`Player "${this.editingPlayer.name}" updated successfully`);
+        // Regenerate turn to update any changes
+        this.gameService.generateNewTurn();
+      } else {
+        alert('Failed to update player. Please check if the name already exists.');
+      }
+    } else {
+      // Add new player
+      const success = this.playerManagementService.addPlayer(player);
+      if (success) {
+        console.log(`Player "${player.name}" added successfully`);
+        // Regenerate turn to include new player
+        this.gameService.generateNewTurn();
+      } else {
+        alert('Failed to add player. Please check if the name already exists.');
+      }
+    }
+    this.closePlayerModal();
+  }
+
+  removePlayer(player: PlayerImpl): void {
+    if (confirm(`Are you sure you want to remove ${player.name}?`)) {
+      const success = this.playerManagementService.removePlayer(player.name);
+      if (success) {
+        console.log(`Player "${player.name}" removed successfully`);
+        // Regenerate turn to update player list
+        this.gameService.generateNewTurn();
+      } else {
+        alert('Failed to remove player.');
+      }
     }
   }
 }

@@ -19,6 +19,29 @@ interface TranslationKeys {
   'health.add': string;
   'player.eliminated': string;
   
+  // Player Management
+  'player.add': string;
+  'player.edit': string;
+  'player.name': string;
+  'player.name.required': string;
+  'player.name.placeholder': string;
+  'player.backstory': string;
+  'player.backstory.placeholder': string;
+  'player.image': string;
+  'player.image.placeholder': string;
+  'player.health': string;
+  'player.voiceId': string;
+  'player.voiceId.placeholder': string;
+  'player.traits': string;
+  'player.traits.placeholder': string;
+  'player.inventory': string;
+  'player.inventory.placeholder': string;
+  'player.attacks': string;
+  'player.attacks.placeholder': string;
+  'cancel': string;
+  'create': string;
+  'update': string;
+  
   // Game Messages
   'player.revived': string;
   'player.died': string;
@@ -74,6 +97,29 @@ export class I18nService {
       'health.add': 'Click to add health',
       'player.eliminated': 'Player is eliminated',
       
+      // Player Management
+      'player.add': 'Add Player',
+      'player.edit': 'Edit Player',
+      'player.name': 'Name',
+      'player.name.required': 'Player name is required',
+      'player.name.placeholder': 'Enter player name',
+      'player.backstory': 'Backstory',
+      'player.backstory.placeholder': 'Enter player backstory...',
+      'player.image': 'Image Path',
+      'player.image.placeholder': 'assets/images/player.png',
+      'player.health': 'Health',
+      'player.voiceId': 'Voice ID',
+      'player.voiceId.placeholder': 'Enter voice ID for TTS',
+      'player.traits': 'Traits',
+      'player.traits.placeholder': 'Enter personality traits...',
+      'player.inventory': 'Inventory',
+      'player.inventory.placeholder': 'Enter inventory items...',
+      'player.attacks': 'Attacks',
+      'player.attacks.placeholder': 'Enter available attacks...',
+      'cancel': 'Cancel',
+      'create': 'Create',
+      'update': 'Update',
+      
       // Game Messages
       'player.revived': 'has been revived!',
       'player.died': 'has been eliminated!',
@@ -117,6 +163,29 @@ export class I18nService {
       'health.remove': 'Cliquez pour retirer de la santé',
       'health.add': 'Cliquez pour ajouter de la santé',
       'player.eliminated': 'Le joueur est éliminé',
+      
+      // Player Management
+      'player.add': 'Ajouter un Joueur',
+      'player.edit': 'Modifier le Joueur',
+      'player.name': 'Nom',
+      'player.name.required': 'Le nom du joueur est requis',
+      'player.name.placeholder': 'Entrez le nom du joueur',
+      'player.backstory': 'Histoire',
+      'player.backstory.placeholder': 'Entrez l\'histoire du joueur...',
+      'player.image': 'Chemin de l\'Image',
+      'player.image.placeholder': 'assets/images/joueur.png',
+      'player.health': 'Santé',
+      'player.voiceId': 'ID Voix',
+      'player.voiceId.placeholder': 'Entrez l\'ID voix pour TTS',
+      'player.traits': 'Traits',
+      'player.traits.placeholder': 'Entrez les traits de personnalité...',
+      'player.inventory': 'Inventaire',
+      'player.inventory.placeholder': 'Entrez les objets de l\'inventaire...',
+      'player.attacks': 'Attaques',
+      'player.attacks.placeholder': 'Entrez les attaques disponibles...',
+      'cancel': 'Annuler',
+      'create': 'Créer',
+      'update': 'Mettre à jour',
       
       // Game Messages
       'player.revived': 'a été ressuscité !',

@@ -19,6 +19,8 @@ export class PlayerCardComponent {
   @Output() healthToggle = new EventEmitter<{ player: PlayerImpl, heartIndex: number }>();
   @Output() playerClick = new EventEmitter<PlayerImpl>();
   @Output() playerSpeak = new EventEmitter<PlayerImpl>();
+  @Output() playerEdit = new EventEmitter<PlayerImpl>();
+  @Output() playerDelete = new EventEmitter<PlayerImpl>();
 
   constructor(
     protected i18n: I18nService
@@ -41,5 +43,15 @@ export class PlayerCardComponent {
     if (this.player.isAlive()) {
       this.playerSpeak.emit(this.player);
     }
+  }
+
+  onEditClick(event: Event): void {
+    event.stopPropagation();
+    this.playerEdit.emit(this.player);
+  }
+
+  onDeleteClick(event: Event): void {
+    event.stopPropagation();
+    this.playerDelete.emit(this.player);
   }
 }

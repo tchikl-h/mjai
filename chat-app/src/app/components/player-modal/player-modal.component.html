@@ -1,0 +1,104 @@
+<div class="modal-backdrop" *ngIf="isOpen" (click)="onBackdropClick($event)">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>{{ isEditMode ? i18n.translate('player.edit') : i18n.translate('player.add') }}</h2>
+      <button class="close-button" (click)="onClose()">&times;</button>
+    </div>
+    
+    <form class="modal-body" (ngSubmit)="onSave()">
+      <div class="form-group">
+        <label for="name">{{ i18n.translate('player.name') }}*</label>
+        <input 
+          type="text" 
+          id="name" 
+          [(ngModel)]="playerData.name" 
+          name="name"
+          required
+          placeholder="{{ i18n.translate('player.name.placeholder') }}">
+      </div>
+
+      <div class="form-group">
+        <label for="backstory">{{ i18n.translate('player.backstory') }}</label>
+        <textarea 
+          id="backstory" 
+          [(ngModel)]="playerData.backstory" 
+          name="backstory"
+          rows="4"
+          placeholder="{{ i18n.translate('player.backstory.placeholder') }}"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="imageUri">{{ i18n.translate('player.image') }}</label>
+        <input 
+          type="text" 
+          id="imageUri" 
+          [(ngModel)]="playerData.imageUri" 
+          name="imageUri"
+          placeholder="{{ i18n.translate('player.image.placeholder') }}">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group half">
+          <label for="health">{{ i18n.translate('player.health') }}</label>
+          <input 
+            type="number" 
+            id="health" 
+            [(ngModel)]="playerData.health" 
+            name="health"
+            min="0" 
+            max="3"
+            placeholder="3">
+        </div>
+
+        <div class="form-group half">
+          <label for="voiceId">{{ i18n.translate('player.voiceId') }}</label>
+          <input 
+            type="text" 
+            id="voiceId" 
+            [(ngModel)]="playerData.voiceId" 
+            name="voiceId"
+            placeholder="{{ i18n.translate('player.voiceId.placeholder') }}">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="traits">{{ i18n.translate('player.traits') }}</label>
+        <textarea 
+          id="traits" 
+          [(ngModel)]="playerData.traits" 
+          name="traits"
+          rows="2"
+          placeholder="{{ i18n.translate('player.traits.placeholder') }}"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="inventory">{{ i18n.translate('player.inventory') }}</label>
+        <textarea 
+          id="inventory" 
+          [(ngModel)]="playerData.inventory" 
+          name="inventory"
+          rows="2"
+          placeholder="{{ i18n.translate('player.inventory.placeholder') }}"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="attacks">{{ i18n.translate('player.attacks') }}</label>
+        <textarea 
+          id="attacks" 
+          [(ngModel)]="playerData.attacks" 
+          name="attacks"
+          rows="2"
+          placeholder="{{ i18n.translate('player.attacks.placeholder') }}"></textarea>
+      </div>
+    </form>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="onClose()">
+        {{ i18n.translate('cancel') }}
+      </button>
+      <button type="button" class="btn btn-primary" (click)="onSave()">
+        {{ isEditMode ? i18n.translate('update') : i18n.translate('create') }}
+      </button>
+    </div>
+  </div>
+</div>

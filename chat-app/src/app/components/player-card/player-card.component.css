@@ -224,6 +224,36 @@
   margin-left: 3px;
 }
 
+.edit-button,
+.delete-button {
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  margin-left: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-button:hover {
+  background-color: rgba(52, 152, 219, 0.2);
+  transform: scale(1.1);
+}
+
+.delete-button:hover {
+  background-color: rgba(231, 76, 60, 0.2);
+  transform: scale(1.1);
+}
+
+.edit-button:active,
+.delete-button:active {
+  transform: scale(0.95);
+}
+
 .current-indicator {
   color: #28a745;
   font-size: 1.2rem;

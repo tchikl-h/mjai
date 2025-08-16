@@ -41,6 +41,24 @@
           type="button">
           🗣️
         </button>
+        <!-- Edit button -->
+        <button 
+          *ngIf="showControls && size !== 'small'"
+          class="edit-button"
+          (click)="onEditClick($event)"
+          [title]="'Edit ' + player.name"
+          type="button">
+          ✏️
+        </button>
+        <!-- Delete button -->
+        <button 
+          *ngIf="showControls && size !== 'small'"
+          class="delete-button"
+          (click)="onDeleteClick($event)"
+          [title]="'Delete ' + player.name"
+          type="button">
+          🗑️
+        </button>
         <!-- Trait icon - DEACTIVATED -->
         <!--
         <span 

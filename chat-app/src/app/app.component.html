@@ -16,7 +16,9 @@
         [clickable]="player.isAlive()"
         (healthToggle)="onHealthToggle($event)"
         (playerClick)="onPlayerClick($event)"
-        (playerSpeak)="onPlayerSpeak($event)">
+        (playerSpeak)="onPlayerSpeak($event)"
+        (playerEdit)="openEditPlayerModal($event)"
+        (playerDelete)="removePlayer($event)">
       </app-player-card>
     </div>
 
@@ -27,6 +29,12 @@
         class="new-turn-button"
         [title]="'Start new turn with reshuffled player order'">
         🔄 New Turn
+      </button>
+      <button 
+        (click)="openAddPlayerModal()" 
+        class="add-player-button"
+        [title]="i18n.translate('player.add')">
+        ➕ {{ i18n.translate('player.add') }}
       </button>
     </div>
   </div>
@@ -145,4 +153,13 @@
     backendUrl="http://localhost:3001/api/tts"
     [style.display]="'none'">
   </app-eleven-tts>
+
+  <!-- Player Management Modal -->
+  <app-player-modal
+    [isOpen]="isPlayerModalOpen"
+    [isEditMode]="isEditMode"
+    [editPlayer]="editingPlayer"
+    (close)="closePlayerModal()"
+    (save)="onPlayerSave($event)">
+  </app-player-modal>
 </div>
